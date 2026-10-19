@@ -1,0 +1,4 @@
+export type LocalSaveItem = { outputId: string; category?: import('./output-folders').OutputCategory; status: 'pending' | 'saving' | 'saved' | 'duplicate' | 'failed'; bytes: number; filename: string | null; dateFolder: string | null; error: string | null }
+export type LocalSaveJob = { automatic?: boolean; id: string; status: 'saving' | 'completed' | 'partial' | 'failed'; items: LocalSaveItem[] }
+export type AutoSaveEntry = { generationId: string; status: string; message: string; saved: number; total: number; failed: number; destination: string }
+export type LocalStorageSettings = { enabled: boolean; basePath?: string | null; effectivePath?: string | null; busy?: boolean; job?: LocalSaveJob | null; autoSave?: boolean; autoSaveSince?: string | null; autoSaveStatus?: string; autoQueue?: AutoSaveEntry[]; autoQueueTotal?: number }

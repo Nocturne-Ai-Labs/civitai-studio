@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Civitai Studio",
+  "version": "0.1.0-beta.1",
+  "identifier": "com.civitaistudio.alpha",
+  "build": {
+    "frontendDist": "../bootstrap"
+  },
+  "app": {
+    "windows": [],
+    "withGlobalTauri": false,
+    "security": {
+      "capabilities": [],
+      "csp": "default-src 'none'; style-src 'unsafe-inline'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "externalBin": [
+      "binaries/studio-service"
+    ],
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.ico",
+      "icons/icon.icns"
+    ],
+    "resources": {
+      "../licenses/": "licenses/",
+      "../THIRD-PARTY-NOTICES.txt": "THIRD-PARTY-NOTICES.txt",
+      "../START-HERE.txt": "START HERE.txt"
+    },
+    "shortDescription": "Civitai Studio beta",
+    "longDescription": "A standalone Civitai generation and media workspace. Beta for early testing.",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": false
+      },
+      "nsis": {
+        "installMode": "perMachine",
+        "template": "windows/installer.nsi"
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "12.0"
+    },
+    "linux": {
+      "deb": {
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libgtk-3-0",
+          "libsecret-1-0"
+        ]
+      }
+    },
+    "publisher": "civitaistudio"
+  }
+}

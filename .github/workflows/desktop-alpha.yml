@@ -1,0 +1,96 @@
+name: Desktop beta packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'desktop-v*-beta*'
+
+# Build artifacts for review. Publishing a GitHub release is a separate action.
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-beta-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2022
+            target: x86_64-pc-windows-msvc
+          - name: macOS Apple Silicon
+            runner: macos-15
+            target: aarch64-apple-darwin
+          - name: macOS Intel
+            runner: macos-15-intel
+            target: x86_64-apple-darwin
+          - name: Linux x64
+            runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential curl wget unzip zip file pkg-config libssl-dev \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf \
+            libdbus-1-dev libsecret-1-dev xdg-utils libfuse2
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Package Windows and Linux
+        if: runner.os != 'macOS'
+        run: bun desktop:release --target ${{ matrix.target }}
+
+      - name: Package macOS with ad-hoc signature
+        if: runner.os == 'macOS'
+        env:
+          # Local integrity only: this is not Developer ID signing/notarization.
+          APPLE_SIGNING_IDENTITY: '-'
+        run: bun desktop:release --target ${{ matrix.target }}
+
+      - name: Upload release files only
+        uses: actions/upload-artifact@v7
+        with:
+          name: civitai-studio-beta-${{ matrix.target }}
+          path: |
+            releases/${{ matrix.target }}/*.zip
+            releases/${{ matrix.target }}/*.tar.gz
+            releases/${{ matrix.target }}/*.exe
+            releases/${{ matrix.target }}/*.msi
+            releases/${{ matrix.target }}/*.dmg
+            releases/${{ matrix.target }}/*.deb
+            releases/${{ matrix.target }}/*.rpm
+            releases/${{ matrix.target }}/*.AppImage
+            releases/${{ matrix.target }}/SHA256SUMS
+            releases/${{ matrix.target }}/release-manifest.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+          include-hidden-files: false

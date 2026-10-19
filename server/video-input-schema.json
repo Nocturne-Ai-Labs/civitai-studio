@@ -1,0 +1,6011 @@
+{
+  "source": "https://orchestration.civitai.com/openapi/v2-consumers.json",
+  "checked": "2026-09-27",
+  "schemas": {
+    "VideoGenInput": {
+      "required": [
+        "engine",
+        "prompt"
+      ],
+      "type": "object",
+      "properties": {
+        "engine": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "discriminator": {
+        "propertyName": "engine",
+        "mapping": {
+          "haiper": "#/components/schemas/HaiperVideoGenInput",
+          "mochi": "#/components/schemas/MochiVideoGenInput",
+          "kling": "#/components/schemas/KlingVideoGenInput",
+          "minimax": "#/components/schemas/MiniMaxVideoGenInput",
+          "lightricks": "#/components/schemas/LightricksVideoGenInput",
+          "ltx2": "#/components/schemas/ComfyLtx2VideoGenInput",
+          "ltx2.3": "#/components/schemas/ComfyLtx23VideoGenInput",
+          "ltx2.5": "#/components/schemas/ComfyLtx25VideoGenInput",
+          "hunyuan": "#/components/schemas/HunyuanVdeoGenInput",
+          "wan": "#/components/schemas/WanVideoGenInput",
+          "vidu": "#/components/schemas/ViduVideoGenInput",
+          "vidu-q3": "#/components/schemas/ViduQ3VideoGenInput",
+          "veo3": "#/components/schemas/Veo3VideoGenInput",
+          "gemini-omni": "#/components/schemas/GeminiOmniVideoGenInput",
+          "sora": "#/components/schemas/SoraVideoGenInput",
+          "kling-v3": "#/components/schemas/KlingV3VideoGenInput",
+          "grok": "#/components/schemas/GrokVideoGenInput",
+          "seedance": "#/components/schemas/SeedanceVideoGenInput",
+          "happyHorse": "#/components/schemas/HappyHorseVideoGenInput",
+          "minimax-h3": "#/components/schemas/MiniMaxH3VideoGenInput",
+          "minimax-h3-comfy": "#/components/schemas/ComfyMiniMaxH3VideoGenInput",
+          "flux": "#/components/schemas/Flux3VideoGenInput"
+        }
+      }
+    },
+    "HaiperVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine"
+          ],
+          "type": "object",
+          "properties": {
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "cameraMovement": {
+              "$ref": "#/components/schemas/HaiperVideoGenCameraMovement"
+            },
+            "seed": {
+              "maximum": 4294967295,
+              "minimum": -1,
+              "type": "integer",
+              "default": -1
+            },
+            "duration": {
+              "enum": [
+                2,
+                4,
+                8
+              ],
+              "type": "integer",
+              "default": 2
+            },
+            "aspectRatio": {
+              "$ref": "#/components/schemas/HaiperVideoGenAspectRatio"
+            },
+            "model": {
+              "$ref": "#/components/schemas/HaiperVideoGenModel"
+            },
+            "resolution": {
+              "enum": [
+                720,
+                1080,
+                2160
+              ],
+              "type": "integer",
+              "default": 1080
+            },
+            "enablePromptEnhancer": {
+              "type": "boolean",
+              "default": true
+            },
+            "sourceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "engine": {
+              "enum": [
+                "haiper"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HaiperVideoGenCameraMovement": {
+      "enum": [
+        "none",
+        "panRight",
+        "panLeft",
+        "tiltUp",
+        "tiltDown",
+        "zoomIn",
+        "zoomOut"
+      ],
+      "type": "string"
+    },
+    "HaiperVideoGenAspectRatio": {
+      "enum": [
+        "16:9",
+        "4:3",
+        "1:1",
+        "9:16",
+        "3:4"
+      ],
+      "type": "string"
+    },
+    "HaiperVideoGenModel": {
+      "enum": [
+        "v1_5",
+        "v2"
+      ],
+      "type": "string"
+    },
+    "MochiVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "seed"
+          ],
+          "type": "object",
+          "properties": {
+            "seed": {
+              "maximum": 2147483647,
+              "minimum": -1,
+              "type": "integer"
+            },
+            "enablePromptEnhancer": {
+              "type": "boolean",
+              "default": true
+            },
+            "engine": {
+              "enum": [
+                "mochi"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "KlingVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "cfgScale",
+            "engine"
+          ],
+          "type": "object",
+          "properties": {
+            "model": {
+              "$ref": "#/components/schemas/KlingModel"
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "cfgScale": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.5
+            },
+            "mode": {
+              "$ref": "#/components/schemas/KlingMode"
+            },
+            "aspectRatio": {
+              "$ref": "#/components/schemas/KlingVideoGenAspectRatio"
+            },
+            "duration": {
+              "$ref": "#/components/schemas/KlingVideoGenDuration"
+            },
+            "cameraControl": {
+              "$ref": "#/components/schemas/KlingCameraControl"
+            },
+            "sourceImageUrl": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sourceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "engine": {
+              "enum": [
+                "kling"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "KlingModel": {
+      "enum": [
+        "v1",
+        "v1.5",
+        "v1.6",
+        "v2",
+        "v2.5-turbo"
+      ],
+      "type": "string"
+    },
+    "KlingMode": {
+      "enum": [
+        "standard",
+        "professional"
+      ],
+      "type": "string"
+    },
+    "KlingVideoGenAspectRatio": {
+      "enum": [
+        "16:9",
+        "9:16",
+        "1:1"
+      ],
+      "type": "string"
+    },
+    "KlingVideoGenDuration": {
+      "enum": [
+        "5",
+        "10"
+      ],
+      "type": "string"
+    },
+    "KlingCameraControl": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/components/schemas/KlingCameraControlConfig"
+        }
+      },
+      "additionalProperties": false
+    },
+    "KlingCameraControlConfig": {
+      "type": "object",
+      "properties": {
+        "horizontal": {
+          "maximum": 10,
+          "minimum": -10,
+          "type": [
+            "null",
+            "number"
+          ]
+        },
+        "vertical": {
+          "maximum": 10,
+          "minimum": -10,
+          "type": [
+            "null",
+            "number"
+          ]
+        },
+        "pan": {
+          "maximum": 10,
+          "minimum": -10,
+          "type": [
+            "null",
+            "number"
+          ]
+        },
+        "tilt": {
+          "maximum": 10,
+          "minimum": -10,
+          "type": [
+            "null",
+            "number"
+          ]
+        },
+        "roll": {
+          "maximum": 10,
+          "minimum": -10,
+          "type": [
+            "null",
+            "number"
+          ]
+        },
+        "zoom": {
+          "maximum": 10,
+          "minimum": -10,
+          "type": [
+            "null",
+            "number"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "MiniMaxVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine"
+          ],
+          "type": "object",
+          "properties": {
+            "model": {
+              "$ref": "#/components/schemas/MiniMaxVideoGenModel"
+            },
+            "enablePromptEnhancer": {
+              "type": "boolean",
+              "default": true
+            },
+            "sourceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "engine": {
+              "enum": [
+                "minimax"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MiniMaxVideoGenModel": {
+      "enum": [
+        "hailou"
+      ],
+      "type": "string"
+    },
+    "LightricksVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "cfgScale",
+            "engine"
+          ],
+          "type": "object",
+          "properties": {
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "cfgScale": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number",
+              "default": 4
+            },
+            "frameRate": {
+              "type": "integer",
+              "default": 25
+            },
+            "duration": {
+              "maximum": 30,
+              "minimum": 1,
+              "type": "integer",
+              "default": 5
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "steps": {
+              "maximum": 50,
+              "minimum": 10,
+              "type": "integer",
+              "default": 20
+            },
+            "aspectRatio": {
+              "$ref": "#/components/schemas/LightricksAspectRatio"
+            },
+            "sourceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "expandPrompt": {
+              "type": "boolean",
+              "default": true
+            },
+            "engine": {
+              "enum": [
+                "lightricks"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "LightricksAspectRatio": {
+      "enum": [
+        "1:1",
+        "16:9",
+        "9:16",
+        "3:2",
+        "2:3"
+      ],
+      "type": "string"
+    },
+    "ComfyLtx2VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "createVideo"
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "duration": {
+              "enum": [
+                3,
+                5
+              ],
+              "type": "integer",
+              "default": 5
+            },
+            "width": {
+              "type": "integer",
+              "default": 1280
+            },
+            "height": {
+              "type": "integer",
+              "default": 720
+            },
+            "fps": {
+              "maximum": 60,
+              "minimum": 1,
+              "type": "number",
+              "default": 24
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "guidanceScale": {
+              "maximum": 10,
+              "minimum": 1,
+              "type": "number",
+              "default": 4
+            },
+            "steps": {
+              "maximum": 50,
+              "minimum": 8,
+              "type": "integer",
+              "default": 20
+            },
+            "model": {
+              "enum": [
+                "19b-dev",
+                "19b-distilled"
+              ],
+              "type": "string",
+              "default": "19b-dev"
+            },
+            "loras": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "engine": {
+              "enum": [
+                "ltx2"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "createVideo": "#/components/schemas/ComfyLtx2CreateVideoInput",
+              "extendVideo": "#/components/schemas/ComfyLtx2ExtendVideoInput",
+              "editVideo": "#/components/schemas/ComfyLtx2EditVideoInput",
+              "firstLastFrameToVideo": "#/components/schemas/ComfyLtx2FirstLastFrameToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "ComfyLtx2CreateVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx2VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "maxItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "createVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx2ExtendVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx2VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "numFrames": {
+              "maximum": 481,
+              "minimum": 9,
+              "type": "integer",
+              "default": 121
+            },
+            "operation": {
+              "enum": [
+                "extendVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx2EditVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx2VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "cannyLowThreshold": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.4
+            },
+            "cannyHighThreshold": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.8
+            },
+            "guideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 1
+            },
+            "operation": {
+              "enum": [
+                "editVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx2FirstLastFrameToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx2VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "firstFrame": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "lastFrame": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "frameGuideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.7
+            },
+            "operation": {
+              "enum": [
+                "firstLastFrameToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx23VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "createVideo"
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "duration": {
+              "maximum": 20,
+              "minimum": 3,
+              "type": "integer",
+              "default": 5
+            },
+            "width": {
+              "type": "integer",
+              "default": 1280
+            },
+            "height": {
+              "type": "integer",
+              "default": 720
+            },
+            "fps": {
+              "maximum": 60,
+              "minimum": 1,
+              "type": "number",
+              "default": 24
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "guidanceScale": {
+              "maximum": 10,
+              "minimum": 1,
+              "type": "number",
+              "default": 4
+            },
+            "steps": {
+              "maximum": 50,
+              "minimum": 8,
+              "type": "integer",
+              "default": 20
+            },
+            "model": {
+              "enum": [
+                "22b-dev",
+                "22b-distilled"
+              ],
+              "type": "string",
+              "default": "22b-dev"
+            },
+            "loras": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "diffusionModel": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "quantity": {
+              "maximum": 10,
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
+            },
+            "engine": {
+              "enum": [
+                "ltx2.3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "createVideo": "#/components/schemas/ComfyLtx23CreateVideoInput",
+              "extendVideo": "#/components/schemas/ComfyLtx23ExtendVideoInput",
+              "editVideo": "#/components/schemas/ComfyLtx23EditVideoInput",
+              "firstLastFrameToVideo": "#/components/schemas/ComfyLtx23FirstLastFrameToVideoInput",
+              "videoToVideo": "#/components/schemas/ComfyLtx23VideoToVideoInput",
+              "audioToVideo": "#/components/schemas/ComfyLtx23AudioToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "ComfyLtx23CreateVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx23VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "maxItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "createVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx23ExtendVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx23VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "numFrames": {
+              "maximum": 481,
+              "minimum": 9,
+              "type": "integer",
+              "default": 121
+            },
+            "operation": {
+              "enum": [
+                "extendVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx23EditVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx23VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "cannyLowThreshold": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.4
+            },
+            "cannyHighThreshold": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.8
+            },
+            "guideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 1
+            },
+            "operation": {
+              "enum": [
+                "editVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx23FirstLastFrameToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx23VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "firstFrame": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "lastFrame": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "frameGuideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.7
+            },
+            "operation": {
+              "enum": [
+                "firstLastFrameToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx23VideoToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx23VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "guideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.2
+            },
+            "operation": {
+              "enum": [
+                "videoToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx23AudioToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx23VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceAudio"
+          ],
+          "type": "object",
+          "properties": {
+            "referenceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sourceAudio": {
+              "type": "string"
+            },
+            "imageGuideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.7
+            },
+            "audioToVideoAttentionScale": {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "number",
+              "default": 2
+            },
+            "operation": {
+              "enum": [
+                "audioToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx25VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "createVideo"
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "duration": {
+              "maximum": 20,
+              "minimum": 3,
+              "type": "integer",
+              "default": 5
+            },
+            "width": {
+              "type": "integer",
+              "default": 1280
+            },
+            "height": {
+              "type": "integer",
+              "default": 720
+            },
+            "fps": {
+              "maximum": 60,
+              "minimum": 1,
+              "type": "number",
+              "default": 24
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "guidanceScale": {
+              "maximum": 10,
+              "minimum": 1,
+              "type": "number",
+              "default": 4
+            },
+            "steps": {
+              "maximum": 50,
+              "minimum": 8,
+              "type": "integer",
+              "default": 20
+            },
+            "model": {
+              "enum": [
+                "22b-dev",
+                "22b-distilled"
+              ],
+              "type": "string",
+              "default": "22b-dev"
+            },
+            "loras": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "diffusionModel": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "quantity": {
+              "maximum": 10,
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
+            },
+            "engine": {
+              "enum": [
+                "ltx2.5"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "createVideo": "#/components/schemas/ComfyLtx25CreateVideoInput",
+              "extendVideo": "#/components/schemas/ComfyLtx25ExtendVideoInput",
+              "editVideo": "#/components/schemas/ComfyLtx25EditVideoInput",
+              "firstLastFrameToVideo": "#/components/schemas/ComfyLtx25FirstLastFrameToVideoInput",
+              "videoToVideo": "#/components/schemas/ComfyLtx25VideoToVideoInput",
+              "audioToVideo": "#/components/schemas/ComfyLtx25AudioToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "ComfyLtx25CreateVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx25VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "maxItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "createVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.5"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx25ExtendVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx25VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "numFrames": {
+              "maximum": 481,
+              "minimum": 9,
+              "type": "integer",
+              "default": 121
+            },
+            "operation": {
+              "enum": [
+                "extendVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.5"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx25EditVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx25VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "guideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 1
+            },
+            "operation": {
+              "enum": [
+                "editVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.5"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx25FirstLastFrameToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx25VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "firstFrame": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "lastFrame": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "frameGuideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.7
+            },
+            "operation": {
+              "enum": [
+                "firstLastFrameToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.5"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx25VideoToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx25VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "guideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.2
+            },
+            "operation": {
+              "enum": [
+                "videoToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.5"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyLtx25AudioToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyLtx25VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceAudio"
+          ],
+          "type": "object",
+          "properties": {
+            "referenceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sourceAudio": {
+              "type": "string"
+            },
+            "imageGuideStrength": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0.7
+            },
+            "audioToVideoAttentionScale": {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "number",
+              "default": 2
+            },
+            "operation": {
+              "enum": [
+                "audioToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "ltx2.5"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HunyuanVdeoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "cfgScale",
+            "engine",
+            "height",
+            "width"
+          ],
+          "type": "object",
+          "properties": {
+            "cfgScale": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number",
+              "default": 4
+            },
+            "frameRate": {
+              "type": "integer",
+              "default": 25
+            },
+            "duration": {
+              "maximum": 30,
+              "minimum": 1,
+              "type": "integer",
+              "default": 5
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "steps": {
+              "maximum": 50,
+              "minimum": 10,
+              "type": "integer",
+              "default": 20
+            },
+            "width": {
+              "type": "integer"
+            },
+            "height": {
+              "type": "integer"
+            },
+            "loras": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/VideoGenInputLora"
+              }
+            },
+            "model": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "engine": {
+              "enum": [
+                "hunyuan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "VideoGenInputLora": {
+      "required": [
+        "air",
+        "strength"
+      ],
+      "type": "object",
+      "properties": {
+        "air": {
+          "type": "string"
+        },
+        "strength": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "WanVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "cfgScale",
+            "engine",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "v2.1"
+            },
+            "sourceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "cfgScale": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number",
+              "default": 4
+            },
+            "frameRate": {
+              "type": "integer",
+              "default": 24
+            },
+            "duration": {
+              "maximum": 30,
+              "minimum": 1,
+              "type": "integer",
+              "default": 5
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "steps": {
+              "maximum": 50,
+              "minimum": 10,
+              "type": "integer",
+              "default": 20
+            },
+            "loras": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/VideoGenInputLora"
+              }
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "version",
+            "mapping": {
+              "v2.1": "#/components/schemas/Wan21VideoGenInput",
+              "v2.2": "#/components/schemas/Wan22VideoGenInput",
+              "v2.2-5b": "#/components/schemas/Wan225bVideoGenInput",
+              "v2.5": "#/components/schemas/Wan25VideoGenInput",
+              "v2.6": "#/components/schemas/Wan26VideoGenInput",
+              "v2.7": "#/components/schemas/Wan27VideoGenInput",
+              "v3.0": "#/components/schemas/Wan30VideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan21VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/WanVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "civitai"
+            },
+            "version": {
+              "enum": [
+                "v2.1"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "provider",
+            "mapping": {
+              "civitai": "#/components/schemas/Wan21CivitaiVideoGenInput",
+              "fal": "#/components/schemas/Wan21FalVideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan21CivitaiVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan21VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "integer",
+              "default": 480
+            },
+            "height": {
+              "type": "integer",
+              "default": 480
+            },
+            "model": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "provider": {
+              "enum": [
+                "civitai"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.1"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan21FalVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan21VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "1:1",
+                "16:9",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "enablePromptExpansion": {
+              "type": "boolean",
+              "default": false
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.1"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan22VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/WanVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "fal"
+            },
+            "version": {
+              "enum": [
+                "v2.2"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "provider",
+            "mapping": {
+              "fal": "#/components/schemas/Wan22FalVideoGenInput",
+              "comfy": "#/components/schemas/Wan22ComfyVideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan22FalVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan22VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "text-to-video"
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "1:1",
+                "16:9",
+                "9:16",
+                "4:3",
+                "3:4",
+                "4:5",
+                "5:4"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "enablePromptExpansion": {
+              "type": "boolean",
+              "default": false
+            },
+            "shift": {
+              "maximum": 10,
+              "minimum": 1,
+              "type": "number",
+              "default": 5
+            },
+            "interpolatorModel": {
+              "enum": [
+                "film",
+                "rife"
+              ],
+              "type": "string",
+              "default": "film"
+            },
+            "useTurbo": {
+              "type": "boolean",
+              "default": false
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "enableSafetyChecker": {
+              "type": "boolean",
+              "default": false
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.2"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "text-to-video": "#/components/schemas/Wan22FalTextToVideoInput",
+              "image-to-video": "#/components/schemas/Wan22FalImageToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan22FalTextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan22FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "enum": [
+                "text-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.2"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan22FalImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan22FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "image-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.2"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan22ComfyVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan22VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "width": {
+              "maximum": 2048,
+              "minimum": 64,
+              "type": "integer",
+              "default": 1280
+            },
+            "height": {
+              "maximum": 2048,
+              "minimum": 64,
+              "type": "integer",
+              "default": 720
+            },
+            "model": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sampler": {
+              "enum": [
+                "euler",
+                "euler_ancestral",
+                "heun",
+                "heunpp2",
+                "dpm_2",
+                "dpm_2_ancestral",
+                "lms",
+                "dpm_fast",
+                "dpm_adaptive",
+                "dpmpp_2s_ancestral",
+                "dpmpp_sde",
+                "dpmpp_2m",
+                "dpmpp_2m_sde",
+                "dpmpp_3m_sde",
+                "ddpm",
+                "lcm",
+                "uni_pc",
+                "uni_pc_bh2"
+              ],
+              "type": "string",
+              "default": "euler"
+            },
+            "scheduler": {
+              "enum": [
+                "normal",
+                "karras",
+                "exponential",
+                "sgm_uniform",
+                "simple",
+                "ddim_uniform",
+                "beta"
+              ],
+              "type": "string",
+              "default": "simple"
+            },
+            "shift": {
+              "maximum": 20,
+              "minimum": 1,
+              "type": "number",
+              "default": 8
+            },
+            "provider": {
+              "enum": [
+                "comfy"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.2"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan225bVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/WanVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "fal"
+            },
+            "version": {
+              "enum": [
+                "v2.2-5b"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "provider",
+            "mapping": {
+              "fal": "#/components/schemas/Wan225bFalVideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan225bFalVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan225bVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "text-to-video"
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "580p",
+                "720p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "1:1",
+                "16:9",
+                "9:16",
+                "auto"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "enablePromptExpansion": {
+              "type": "boolean",
+              "default": false
+            },
+            "useDistill": {
+              "type": "boolean",
+              "default": false
+            },
+            "useFastWan": {
+              "type": "boolean",
+              "default": false
+            },
+            "interpolatorModel": {
+              "enum": [
+                "none",
+                "film",
+                "rife"
+              ],
+              "type": "string",
+              "default": "film"
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "enableSafetyChecker": {
+              "type": "boolean",
+              "default": false
+            },
+            "numInferenceSteps": {
+              "maximum": 50,
+              "minimum": 2,
+              "type": "integer",
+              "default": 20
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.2-5b"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "text-to-video": "#/components/schemas/Wan225bFalTextToVideoInput",
+              "image-to-video": "#/components/schemas/Wan225bFalImageToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan225bFalTextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan225bFalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "enum": [
+                "text-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.2-5b"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan225bFalImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan225bFalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "image-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.2-5b"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan25VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/WanVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "fal"
+            },
+            "version": {
+              "enum": [
+                "v2.5"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "provider",
+            "mapping": {
+              "fal": "#/components/schemas/Wan25FalVideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan25FalVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan25VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "text-to-video"
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "1080p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "enablePromptExpansion": {
+              "type": "boolean",
+              "default": true
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.5"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "text-to-video": "#/components/schemas/Wan25FalTextToVideoInput",
+              "image-to-video": "#/components/schemas/Wan25FalImageToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan25FalTextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan25FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "enum": [
+                "text-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.5"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan25FalImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan25FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "image-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.5"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan26VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/WanVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "fal"
+            },
+            "version": {
+              "enum": [
+                "v2.6"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "provider",
+            "mapping": {
+              "fal": "#/components/schemas/Wan26FalVideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan26FalVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan26VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "text-to-video"
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "1080p"
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "enablePromptExpansion": {
+              "type": "boolean",
+              "default": true
+            },
+            "multiShots": {
+              "type": "boolean",
+              "default": false
+            },
+            "enableSafetyChecker": {
+              "type": "boolean",
+              "default": false
+            },
+            "audioUrl": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.6"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "text-to-video": "#/components/schemas/Wan26FalTextToVideoInput",
+              "image-to-video": "#/components/schemas/Wan26FalImageToVideoInput",
+              "reference-to-video": "#/components/schemas/Wan26FalReferenceToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan26FalTextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan26FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "operation": {
+              "enum": [
+                "text-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.6"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan26FalImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan26FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "image-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.6"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan26FalReferenceToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan26FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "referenceVideoUrls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "duration": {
+              "maximum": 10,
+              "minimum": 5,
+              "type": "integer",
+              "default": 5
+            },
+            "operation": {
+              "enum": [
+                "reference-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.6"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan27VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/WanVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "fal"
+            },
+            "version": {
+              "enum": [
+                "v2.7"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "provider",
+            "mapping": {
+              "fal": "#/components/schemas/Wan27FalVideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan27FalVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan27VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "text-to-video"
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "1080p"
+            },
+            "enableSafetyChecker": {
+              "type": "boolean",
+              "default": false
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.7"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "text-to-video": "#/components/schemas/Wan27FalTextToVideoInput",
+              "image-to-video": "#/components/schemas/Wan27FalImageToVideoInput",
+              "reference-to-video": "#/components/schemas/Wan27FalReferenceToVideoInput",
+              "edit-video": "#/components/schemas/Wan27FalEditVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan27FalTextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan27FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "enablePromptExpansion": {
+              "type": "boolean",
+              "default": true
+            },
+            "audioUrl": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "text-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.7"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan27FalImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan27FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "startImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "endImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "videoUrl": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "enablePromptExpansion": {
+              "type": "boolean",
+              "default": true
+            },
+            "audioUrl": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "image-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.7"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan27FalReferenceToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan27FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "referenceImages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "referenceVideoUrls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "multiShots": {
+              "type": "boolean",
+              "default": false
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "reference-to-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.7"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan27FalEditVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan27FalVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "provider",
+            "version",
+            "videoUrl"
+          ],
+          "type": "object",
+          "properties": {
+            "videoUrl": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "referenceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "audioSetting": {
+              "enum": [
+                "auto",
+                "origin"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "operation": {
+              "enum": [
+                "edit-video"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "enum": [
+                "fal"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v2.7"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan30VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/WanVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "text-to-video"
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "1080p"
+            },
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "enablePromptExpansion": {
+              "type": "boolean",
+              "default": true
+            },
+            "usePrime": {
+              "type": "boolean",
+              "default": false
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "text-to-video": "#/components/schemas/Wan30TextToVideoInput",
+              "image-to-video": "#/components/schemas/Wan30ImageToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "Wan30TextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan30VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "operation": {
+              "enum": [
+                "text-to-video"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Wan30ImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Wan30VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "startImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "endImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "image-to-video"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "wan"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ViduVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine"
+          ],
+          "type": "object",
+          "properties": {
+            "enablePromptEnhancer": {
+              "type": "boolean",
+              "default": true
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "sourceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "style": {
+              "$ref": "#/components/schemas/ViduVideoGenStyle"
+            },
+            "duration": {
+              "enum": [
+                4,
+                8
+              ],
+              "type": "integer",
+              "default": 4
+            },
+            "endSourceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "model": {
+              "$ref": "#/components/schemas/ViduVideoGenModel"
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1"
+              ],
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "movementAmplitude": {
+              "enum": [
+                "auto",
+                "small",
+                "medium",
+                "large"
+              ],
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "enableBackgroundMusic": {
+              "type": "boolean",
+              "default": false
+            },
+            "engine": {
+              "enum": [
+                "vidu"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ViduVideoGenStyle": {
+      "enum": [
+        "general",
+        "anime"
+      ],
+      "type": "string"
+    },
+    "ViduVideoGenModel": {
+      "enum": [
+        "default",
+        "q1",
+        "q3"
+      ],
+      "type": "string"
+    },
+    "ViduQ3VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine"
+          ],
+          "type": "object",
+          "properties": {
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "duration": {
+              "maximum": 16,
+              "minimum": 1,
+              "type": "integer",
+              "default": 5
+            },
+            "resolution": {
+              "enum": [
+                "360p",
+                "540p",
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "turbo": {
+              "type": "boolean",
+              "default": false
+            },
+            "enableAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "engine": {
+              "enum": [
+                "vidu-q3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Veo3VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "generateAudio"
+          ],
+          "type": "object",
+          "properties": {
+            "negativePrompt": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "enablePromptEnhancer": {
+              "type": "boolean",
+              "default": true
+            },
+            "aspectRatio": {
+              "$ref": "#/components/schemas/Veo3AspectRatio"
+            },
+            "duration": {
+              "enum": [
+                4,
+                6,
+                8
+              ],
+              "type": "integer",
+              "default": 8
+            },
+            "generateAudio": {
+              "type": "boolean"
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "fastMode": {
+              "type": "boolean",
+              "default": false
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "version": {
+              "$ref": "#/components/schemas/Veo3Version"
+            },
+            "mode": {
+              "$ref": "#/components/schemas/Veo3GenerationMode"
+            },
+            "engine": {
+              "enum": [
+                "veo3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Veo3AspectRatio": {
+      "enum": [
+        "16:9",
+        "9:16",
+        "1:1"
+      ],
+      "type": "string"
+    },
+    "Veo3Version": {
+      "enum": [
+        "3.0",
+        "3.1"
+      ],
+      "type": "string"
+    },
+    "Veo3GenerationMode": {
+      "enum": [
+        "standard",
+        "fast",
+        "lite"
+      ],
+      "type": "string"
+    },
+    "GeminiOmniVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "maxBillableSeconds"
+          ],
+          "type": "object",
+          "properties": {
+            "model": {
+              "$ref": "#/components/schemas/GeminiOmniModel"
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "resolution": {
+              "$ref": "#/components/schemas/GeminiOmniResolution"
+            },
+            "images": {
+              "maxItems": 6,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "maxBillableSeconds": {
+              "type": "integer",
+              "readOnly": true
+            },
+            "engine": {
+              "enum": [
+                "gemini-omni"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "GeminiOmniModel": {
+      "enum": [
+        "1.1-flash"
+      ],
+      "type": "string"
+    },
+    "GeminiOmniResolution": {
+      "enum": [
+        "360p",
+        "720p",
+        "1080p",
+        "4k"
+      ],
+      "type": "string"
+    },
+    "SoraVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "text-to-video"
+            },
+            "duration": {
+              "maximum": 12,
+              "minimum": 4,
+              "type": "integer",
+              "default": 4
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "auto",
+                "16:9",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "usePro": {
+              "type": "boolean",
+              "default": false
+            },
+            "engine": {
+              "enum": [
+                "sora"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "text-to-video": "#/components/schemas/Sora2TextToVideoInput",
+              "image-to-video": "#/components/schemas/Sora2ImageToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "Sora2TextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/SoraVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "enum": [
+                "text-to-video"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "sora"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Sora2ImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/SoraVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "image-to-video"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "sora"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "KlingV3VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "$ref": "#/components/schemas/KlingV3Operation"
+            },
+            "mode": {
+              "$ref": "#/components/schemas/KlingMode"
+            },
+            "duration": {
+              "maximum": 15,
+              "minimum": 3,
+              "type": "integer",
+              "default": 5
+            },
+            "aspectRatio": {
+              "$ref": "#/components/schemas/KlingVideoGenAspectRatio"
+            },
+            "sourceImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "endImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "videoUrl": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "elements": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/KlingV3ElementInput"
+              }
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": false
+            },
+            "voiceIds": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "keepAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "multiPrompt": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "$ref": "#/components/schemas/KlingV3MultiPrompt"
+              }
+            },
+            "engine": {
+              "enum": [
+                "kling-v3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "KlingV3Operation": {
+      "enum": [
+        "text-to-video",
+        "image-to-video",
+        "reference-to-video",
+        "video-to-video-edit",
+        "video-to-video-reference"
+      ],
+      "type": "string"
+    },
+    "KlingV3ElementInput": {
+      "type": "object",
+      "properties": {
+        "frontalImage": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "referenceImages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "videoUrl": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "KlingV3MultiPrompt": {
+      "required": [
+        "prompt"
+      ],
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5
+        }
+      },
+      "additionalProperties": false
+    },
+    "GrokVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "v1.0"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "version",
+            "mapping": {
+              "v1.0": "#/components/schemas/GrokV1VideoGenInput",
+              "v1.5": "#/components/schemas/GrokV1_5VideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "GrokV1VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/GrokVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "text-to-video"
+            },
+            "duration": {
+              "maximum": 15,
+              "minimum": 1,
+              "type": "integer",
+              "default": 6
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "text-to-video": "#/components/schemas/GrokTextToVideoInput",
+              "image-to-video": "#/components/schemas/GrokImageToVideoInput",
+              "edit-video": "#/components/schemas/GrokEditVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "GrokTextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/GrokV1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "4:3",
+                "3:2",
+                "1:1",
+                "2:3",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "operation": {
+              "enum": [
+                "text-to-video"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "GrokImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/GrokV1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "auto",
+                "16:9",
+                "4:3",
+                "3:2",
+                "1:1",
+                "2:3",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "images": {
+              "maxItems": 1,
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "image-to-video"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "GrokEditVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/GrokV1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version",
+            "videoUrl"
+          ],
+          "type": "object",
+          "properties": {
+            "videoUrl": {
+              "type": "string"
+            },
+            "analyzedDuration": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "edit-video"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "GrokV1_5VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/GrokVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "textToVideo"
+            },
+            "version": {
+              "enum": [
+                "v1.5"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "textToVideo": "#/components/schemas/GrokV1_5TextToVideoInput",
+              "imageToVideo": "#/components/schemas/GrokV1_5ImageToVideoInput",
+              "referenceToVideo": "#/components/schemas/GrokV1_5ReferenceToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "GrokV1_5TextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/GrokV1_5VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "duration": {
+              "maximum": 15,
+              "minimum": 1,
+              "type": "integer",
+              "default": 6
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "4:3",
+                "3:2",
+                "1:1",
+                "2:3",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "operation": {
+              "enum": [
+                "textToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.5"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "GrokV1_5ImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/GrokV1_5VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "duration": {
+              "maximum": 15,
+              "minimum": 1,
+              "type": "integer",
+              "default": 6
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "images": {
+              "maxItems": 1,
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "imageToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.5"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "GrokV1_5ReferenceToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/GrokV1_5VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "images",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "duration": {
+              "maximum": 15,
+              "minimum": 1,
+              "type": "integer",
+              "default": 8
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p"
+              ],
+              "type": "string",
+              "default": "480p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "4:3",
+                "3:2",
+                "1:1",
+                "2:3",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "referenceToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.5"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "grok"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "SeedanceVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "aspectRatio",
+            "duration",
+            "engine",
+            "resolution"
+          ],
+          "type": "object",
+          "properties": {
+            "model": {
+              "$ref": "#/components/schemas/SeedanceModel"
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4",
+                "21:9",
+                "adaptive"
+              ],
+              "type": "string"
+            },
+            "duration": {
+              "enum": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30
+              ],
+              "type": "integer"
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ],
+              "type": "string"
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "referenceVideos": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "referenceAudios": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "engine": {
+              "enum": [
+                "seedance"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "SeedanceModel": {
+      "enum": [
+        "v2",
+        "v2-fast",
+        "v2-mini",
+        "v2.5"
+      ],
+      "type": "string"
+    },
+    "HappyHorseVideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "version",
+            "mapping": {
+              "v1.0": "#/components/schemas/HappyHorseV1VideoGenInput",
+              "v1.1": "#/components/schemas/HappyHorseV1_1VideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "HappyHorseV1VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string"
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "1080p"
+            },
+            "duration": {
+              "maximum": 15,
+              "minimum": 3,
+              "type": "integer",
+              "default": 5
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "textToVideo": "#/components/schemas/HappyHorseV1TextToVideoInput",
+              "imageToVideo": "#/components/schemas/HappyHorseV1ImageToVideoInput",
+              "videoEdit": "#/components/schemas/HappyHorseV1VideoEditInput",
+              "referenceToVideo": "#/components/schemas/HappyHorseV1ReferenceToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "HappyHorseV1TextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseV1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "operation": {
+              "enum": [
+                "textToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HappyHorseV1ImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseV1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "image",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string"
+            },
+            "operation": {
+              "enum": [
+                "imageToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HappyHorseV1VideoEditInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseV1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "sourceVideo": {
+              "type": "string"
+            },
+            "referenceImages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "audioSetting": {
+              "enum": [
+                "auto",
+                "origin"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "operation": {
+              "enum": [
+                "videoEdit"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HappyHorseV1ReferenceToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseV1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "images",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "operation": {
+              "enum": [
+                "referenceToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HappyHorseV1_1VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseVideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string"
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "1080p"
+            },
+            "duration": {
+              "maximum": 15,
+              "minimum": 3,
+              "type": "integer",
+              "default": 5
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "version": {
+              "enum": [
+                "v1.1"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "textToVideo": "#/components/schemas/HappyHorseV1_1TextToVideoInput",
+              "imageToVideo": "#/components/schemas/HappyHorseV1_1ImageToVideoInput",
+              "referenceToVideo": "#/components/schemas/HappyHorseV1_1ReferenceToVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "HappyHorseV1_1TextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseV1_1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4",
+                "21:9",
+                "9:21",
+                "5:4",
+                "4:5"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "operation": {
+              "enum": [
+                "textToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.1"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HappyHorseV1_1ImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseV1_1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "image",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string"
+            },
+            "operation": {
+              "enum": [
+                "imageToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.1"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HappyHorseV1_1ReferenceToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/HappyHorseV1_1VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "images",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "aspectRatio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4",
+                "21:9",
+                "9:21",
+                "5:4",
+                "4:5"
+              ],
+              "type": "string",
+              "default": "16:9"
+            },
+            "operation": {
+              "enum": [
+                "referenceToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v1.1"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "happyHorse"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MiniMaxH3VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "aspectRatio",
+            "duration",
+            "engine",
+            "resolution"
+          ],
+          "type": "object",
+          "properties": {
+            "aspectRatio": {
+              "enum": [
+                "adaptive",
+                "21:9",
+                "16:9",
+                "4:3",
+                "1:1",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string"
+            },
+            "duration": {
+              "maximum": 15,
+              "minimum": 5,
+              "type": "integer"
+            },
+            "resolution": {
+              "enum": [
+                "2K"
+              ],
+              "type": "string"
+            },
+            "firstFrameImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "lastFrameImage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "referenceImages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "referenceVideos": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "referenceAudios": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "watermark": {
+              "type": "boolean",
+              "default": false
+            },
+            "referenceVideoSeconds": {
+              "type": "integer"
+            },
+            "engine": {
+              "enum": [
+                "minimax-h3"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyMiniMaxH3VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "imageToVideo"
+            },
+            "seed": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "duration": {
+              "maximum": 15,
+              "minimum": 4,
+              "type": "integer",
+              "default": 5
+            },
+            "width": {
+              "maximum": 1344,
+              "minimum": 32,
+              "type": "integer",
+              "default": 864
+            },
+            "height": {
+              "maximum": 1344,
+              "minimum": 32,
+              "type": "integer",
+              "default": 480
+            },
+            "steps": {
+              "maximum": 60,
+              "minimum": 1,
+              "type": "integer",
+              "default": 20
+            },
+            "fast": {
+              "type": "boolean",
+              "default": false
+            },
+            "diffusionModel": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "loras": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "turbo": {
+              "type": "boolean",
+              "default": false
+            },
+            "engine": {
+              "enum": [
+                "minimax-h3-comfy"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "imageToVideo": "#/components/schemas/ComfyMiniMaxH3ImageToVideoInput",
+              "referenceToVideo": "#/components/schemas/ComfyMiniMaxH3ReferenceToVideoInput",
+              "controlVideo": "#/components/schemas/ComfyMiniMaxH3ControlVideoInput"
+            }
+          }
+        }
+      ]
+    },
+    "ComfyMiniMaxH3ImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyMiniMaxH3VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "firstFrame": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "lastFrame": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "imageToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "minimax-h3-comfy"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyMiniMaxH3ReferenceToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyMiniMaxH3VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "images",
+            "operation"
+          ],
+          "type": "object",
+          "properties": {
+            "images": {
+              "maxItems": 9,
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operation": {
+              "enum": [
+                "referenceToVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "minimax-h3-comfy"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ComfyMiniMaxH3ControlVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/ComfyMiniMaxH3VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "video"
+          ],
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "strength": {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "number",
+              "default": 1
+            },
+            "startPercent": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 0
+            },
+            "endPercent": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number",
+              "default": 1
+            },
+            "operation": {
+              "enum": [
+                "controlVideo"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "minimax-h3-comfy"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Flux3VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": "v3.0"
+            },
+            "engine": {
+              "enum": [
+                "flux"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "version",
+            "mapping": {
+              "v3.0": "#/components/schemas/Flux3V3VideoGenInput"
+            }
+          }
+        }
+      ]
+    },
+    "Flux3V3VideoGenInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Flux3VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "flux"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "discriminator": {
+            "propertyName": "operation",
+            "mapping": {
+              "textToVideo": "#/components/schemas/Flux3V3TextToVideoInput",
+              "imageToVideo": "#/components/schemas/Flux3V3ImageToVideoInput",
+              "firstLastFrameToVideo": "#/components/schemas/Flux3V3FirstLastFrameToVideoInput",
+              "keyframesToVideo": "#/components/schemas/Flux3V3KeyframesToVideoInput",
+              "extendVideo": "#/components/schemas/Flux3V3ExtendVideoInput",
+              "draftEnhance": "#/components/schemas/Flux3V3DraftEnhanceInput"
+            }
+          }
+        }
+      ]
+    },
+    "Flux3V3TextToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Flux3V3VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "duration": {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "integer",
+              "default": 5
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "auto",
+                "21:9",
+                "2:1",
+                "16:9",
+                "4:3",
+                "1:1",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "draft": {
+              "type": "boolean",
+              "default": false
+            },
+            "operation": {
+              "enum": [
+                "textToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "flux"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Flux3V3ImageToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Flux3V3VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "image",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "duration": {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "integer",
+              "default": 5
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "auto",
+                "21:9",
+                "2:1",
+                "16:9",
+                "4:3",
+                "1:1",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "draft": {
+              "type": "boolean",
+              "default": false
+            },
+            "image": {
+              "type": "string"
+            },
+            "operation": {
+              "enum": [
+                "imageToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "flux"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Flux3V3FirstLastFrameToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Flux3V3VideoGenInput"
+        },
+        {
+          "required": [
+            "endImage",
+            "engine",
+            "operation",
+            "startImage",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "duration": {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "integer",
+              "default": 5
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "auto",
+                "21:9",
+                "2:1",
+                "16:9",
+                "4:3",
+                "1:1",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "draft": {
+              "type": "boolean",
+              "default": false
+            },
+            "startImage": {
+              "type": "string"
+            },
+            "endImage": {
+              "type": "string"
+            },
+            "operation": {
+              "enum": [
+                "firstLastFrameToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "flux"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Flux3V3KeyframesToVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Flux3V3VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "keyframes",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "duration": {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "integer",
+              "default": 5
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "auto",
+                "21:9",
+                "2:1",
+                "16:9",
+                "4:3",
+                "1:1",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "draft": {
+              "type": "boolean",
+              "default": false
+            },
+            "keyframes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Flux3Keyframe"
+              }
+            },
+            "operation": {
+              "enum": [
+                "keyframesToVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "flux"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Flux3Keyframe": {
+      "required": [
+        "frameIndex",
+        "image"
+      ],
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string"
+        },
+        "frameIndex": {
+          "maximum": 480,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Flux3V3ExtendVideoInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Flux3V3VideoGenInput"
+        },
+        {
+          "required": [
+            "engine",
+            "operation",
+            "sourceVideo",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "duration": {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "integer",
+              "default": 5
+            },
+            "resolution": {
+              "enum": [
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "default": "720p"
+            },
+            "aspectRatio": {
+              "enum": [
+                "auto",
+                "21:9",
+                "2:1",
+                "16:9",
+                "4:3",
+                "1:1",
+                "3:4",
+                "9:16"
+              ],
+              "type": "string",
+              "default": "auto"
+            },
+            "generateAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "draft": {
+              "type": "boolean",
+              "default": false
+            },
+            "sourceVideo": {
+              "type": "string"
+            },
+            "operation": {
+              "enum": [
+                "extendVideo"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "flux"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Flux3V3DraftEnhanceInput": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Flux3V3VideoGenInput"
+        },
+        {
+          "required": [
+            "draftCache",
+            "duration",
+            "engine",
+            "operation",
+            "version"
+          ],
+          "type": "object",
+          "properties": {
+            "draftCache": {
+              "type": "string"
+            },
+            "duration": {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "integer"
+            },
+            "operation": {
+              "enum": [
+                "draftEnhance"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "enum": [
+                "v3.0"
+              ],
+              "type": "string"
+            },
+            "engine": {
+              "enum": [
+                "flux"
+              ],
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

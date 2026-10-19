@@ -1,0 +1,17 @@
+Civitai Studio Alpha uses the Tauri framework (MIT/Apache-2.0), Bun runtime
+(MIT, with its bundled third-party components), React (MIT), Radix UI (MIT),
+Bulma (MIT), Lucide (ISC), SQLite (public domain), and the native system webview.
+
+Upstream license and third-party notices:
+Copies of the primary license texts are included in the licenses directory.
+https://github.com/tauri-apps/tauri/blob/dev/LICENSE-MIT
+https://github.com/tauri-apps/tauri/blob/dev/LICENSE-APACHE-2.0
+https://github.com/oven-sh/bun/blob/main/LICENSE.md
+https://github.com/oven-sh/bun/tree/main/LICENSES
+https://github.com/facebook/react/blob/main/LICENSE
+https://github.com/radix-ui/primitives/blob/main/LICENSE
+https://github.com/jgthms/bulma/blob/master/LICENSE
+https://github.com/lucide-icons/lucide/blob/main/LICENSE
+
+This early alpha is not affiliated with or endorsed by Civitai. Civitai account,
+service terms, permissions and generation charges remain with Civitai.

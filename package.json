@@ -1,0 +1,20 @@
+{
+  "name": "civitai-studio",
+  "private": true,
+  "version": "0.1.0-beta.1",
+  "type": "module",
+  "workspaces": [
+    "web",
+    "server"
+  ],
+  "scripts": {
+    "build": "bun run --cwd web build",
+    "dev": "bun run --cwd server dev",
+    "start": "bun run --cwd server start",
+    "desktop:release": "bun --no-env-file scripts/desktop-release.ts",
+    "desktop:sidecar": "bun --no-env-file scripts/desktop-release.ts --sidecar-only"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

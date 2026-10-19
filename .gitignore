@@ -1,0 +1,98 @@
+# JavaScript / React
+node_modules/
+dist/
+build/
+/desktop/src-tauri/target/
+/desktop/src-tauri/binaries/
+/desktop/src-tauri/gen/
+/releases/
+.vite/
+.turbo/
+coverage/
+
+# Bun / TypeScript
+.bun/
+/.bun-cache/
+*.tsbuildinfo
+bun-error.log*
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.local
+
+# Private credentials and encryption/signing key files
+*.[kK][eE][yY]
+*.[pP][eE][mM]
+*.[pP]12
+*.[pP][fF][xX]
+id_rsa
+id_ed25519
+[sS][eE][cC][rR][eE][tT][sS].json
+[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL][sS].json
+[aA][pP][iI]-[kK][eE][yY].*
+[aA][pP][iI][kK][eE][yY].*
+[cC][iI][vV][iI][tT][aA][iI]-[aA][pP][iI]-[kK][eE][yY].*
+
+# Documentation stays local, including mixed-case Markdown extensions
+*.[mM][dD]
+*.[mM][dD][xX]
+*.[mM][aA][rR][kK][dD][oO][wW][nN]
+*.[mM][dD][oO][wW][nN]
+*.[mM][kK][dD]
+
+# Test/spec sources and conventional test directories stay local
+[tT][eE][sS][tT]/
+[tT][eE][sS][tT][sS]/
+__[tT][eE][sS][tT][sS]__/
+[sS][pP][eE][cC]/
+[sS][pP][eE][cC][sS]/
+[eE]2[eE]/
+[cC][yY][pP][rR][eE][sS][sS]/
+*.[tT][eE][sS][tT].*
+*.[sS][pP][eE][cC].*
+*_[tT][eE][sS][tT].*
+*_[tT][eE][sS][tT][sS].*
+*_[sS][pP][eE][cC].*
+[tT][eE][sS][tT]_*
+[sS][pP][eE][cC]_*
+[tT][eE][sS][tT].*
+[tT][eE][sS][tT][sS].*
+[sS][pP][eE][cC].*
+[sS][pP][eE][cC][sS].*
+*.[tT][eE][sS][tT][sS].*
+*Test.java
+*Tests.java
+*Test.cs
+*Tests.cs
+*Spec.scala
+jest.config.*
+vitest.config.*
+playwright.config.*
+
+# Local library, downloads, app databases, and runtime state
+/library/
+/downloads/
+/data/
+/server/data/
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+# Logs and operating-system files
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# SQLite sidecars (including encrypted OAuth lifecycle state)
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm

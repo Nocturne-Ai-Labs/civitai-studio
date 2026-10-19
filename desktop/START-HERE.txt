@@ -1,0 +1,48 @@
+CIVITAI STUDIO - 0.1.0-beta.1 - EARLY BETA
+
+WINDOWS ZIP
+1. Extract the entire ZIP to a normal folder. Do not launch from inside the ZIP.
+2. Open "Civitai Studio.exe". Keep studio-service.exe beside it.
+3. Connect your own Civitai account in the app. This release contains no account.
+No Bun, Node, Rust, terminal, website or development setup is needed.
+An optional Windows installer is provided too. It defaults to your Windows
+Program Files (x86)\Civitai Studio folder and requests administrator
+approval. You can choose another install folder. Later machine-wide updates
+retain your choice; earlier per-user alpha installations are not automatically
+migrated. The finish page offers an optional desktop shortcut. Account data
+remains in your own AppData profile. The legacy registry and profile identity
+are retained to preserve existing installations and accounts.
+
+Windows 10/11 x64 requires Microsoft Edge WebView2 Evergreen Runtime. It is
+normally already installed; if missing, install it from Microsoft:
+https://developer.microsoft.com/microsoft-edge/webview2/
+The installer can download the runtime; the portable ZIP does not bundle it.
+
+MACOS
+Open the app from the ZIP or DMG. Use the download for your processor (Intel
+or Apple Silicon). macOS 12 or later is required. This beta is not notarized;
+Gatekeeper may block it. macOS builds need native-runner validation.
+
+LINUX
+Prefer the AppImage or .deb. AppImages may require FUSE2; the raw tar archive
+requires WebKitGTK4.1/GTK3 runtime libraries from your distribution. An active
+desktop D-Bus session and unlocked Secret Service keyring (GNOME Keyring or
+KWallet with Secret Service enabled) are required. Headless use is unsupported.
+The keyring requirement protects your API key; there is no plaintext fallback.
+
+YOUR DATA
+The desktop profile is stored per OS account outside this extracted folder,
+under the com.civitaistudio.alpha application data directory, profile-v1.
+API keys are encrypted in its database. The master key is protected with
+Windows DPAPI, macOS Keychain or Linux Secret Service. Do not share profiles.
+This desktop profile is separate from the browser development profile.
+Closing the app stops its local service. Ordinary updates retain your profile.
+
+BETA LIMITS
+This is an unsigned, unnotarized testing release. OS reputation warnings may
+appear. Generation spends your own Civitai Buzz only after cost review and your
+explicit confirmation. Civitai API keys need appropriate permissions; OAuth is
+not configured in this beta. Provider workflows and advanced models may fail
+validation. Report issues with OS/version and steps; never send your API key,
+database, browser cookies or protected key file. Signing, auto-update, store
+distribution and website hosting are not included.

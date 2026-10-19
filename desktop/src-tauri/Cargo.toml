@@ -1,0 +1,33 @@
+[package]
+name = "civitai-studio-desktop"
+version = "0.1.0-beta.1"
+description = "Civitai Studio beta desktop wrapper"
+edition = "2021"
+rust-version = "1.88"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+getrandom = "0.3"
+zeroize = "1"
+open = "5"
+rfd = "0.15"
+fs2 = "0.4"
+cookie = "0.18"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Security_Cryptography", "Win32_Foundation", "Win32_System_Memory"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "3.6.3", default-features = false, features = ["apple-native"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+keyring = { version = "3.6.3", default-features = false, features = ["sync-secret-service", "crypto-rust", "vendored"] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
