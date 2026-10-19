@@ -50,8 +50,8 @@ export function useLocalStorageSettings(accountId: string | null) {
 }
 type StorageController = ReturnType<typeof useLocalStorageSettings>
 
-export function SettingsPanel({ accountId, accountName, theme, onTheme, onAccount, onGallery, storage, browsing }: {
-  accountId: string | null; accountName?: string; theme: 'blue' | 'red'; onTheme: (theme: 'blue' | 'red') => void; onAccount: () => void; onGallery: () => void; storage: StorageController; browsing: BrowsingController
+export function SettingsPanel({ accountId, accountName, theme, onTheme, onAccount, onGuide, onGallery, storage, browsing }: {
+  accountId: string | null; accountName?: string; theme: 'blue' | 'red'; onTheme: (theme: 'blue' | 'red') => void; onAccount: () => void; onGuide: () => void; onGallery: () => void; storage: StorageController; browsing: BrowsingController
 }) {
   const [path, setPath] = useState(''), [copyMessage, setCopyMessage] = useState('')
   const { settings, busy } = storage
@@ -90,7 +90,7 @@ export function SettingsPanel({ accountId, accountName, theme, onTheme, onAccoun
         {settings?.enabled && <AutoSaveQueue storage={storage} />}
       </section></div>
       <div className="column"><BrowsingSettings accountId={accountId} browsing={browsing} /><section className="panel-card settings-card"><h2 className="section-title">Appearance</h2><div className="settings-actions" role="group" aria-label="Color theme">{(['blue', 'red'] as const).map(value => <Button key={value} type="button" variant={theme === value ? 'default' : 'secondary'} aria-pressed={theme === value} onClick={() => onTheme(value)}>{value === 'blue' ? 'Blue' : 'Red'}</Button>)}</div><p>Saved for this browser.</p></section>
-        <section className="panel-card settings-card"><h2 className="section-title">Account</h2><p>{accountId ? accountName || 'Civitai connected' : 'Civitai disconnected'}</p><Button type="button" variant="secondary" onClick={onAccount}>{accountId ? 'Manage connection' : 'Connect Civitai'}</Button><p>Output destinations and save history belong to the connected account.</p></section>
+        <section className="panel-card settings-card"><h2 className="section-title">Account</h2><p>{accountId ? accountName || 'Civitai connected' : 'Civitai disconnected'}</p><div className="account-guide-actions"><Button type="button" variant="secondary" onClick={onAccount}>{accountId ? 'Manage connection' : 'Connect Civitai'}</Button><Button type="button" variant="ghost" onClick={onGuide}>Getting started &amp; Buzz guide</Button></div><p>Output destinations and save history belong to the connected account.</p></section>
       </div>
     </div>
   </section>
