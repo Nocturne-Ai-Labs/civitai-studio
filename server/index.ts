@@ -21,6 +21,7 @@ import { musicProviderInput, musicProviderProblem } from '../shared/music';
 import { collectionApi } from './collections';
 import { configError, promptLimit, parseAir, type ComposerConfig } from '../shared/composer';
 import { publicModel, resolveModelVersion, siteJson, SiteError, validateGenerationResources, withDiscoveryLimit } from './models';
+import { listGenerationServices, GenerationDiscoveryError } from './generation-services';
 import { createHash, randomBytes } from "node:crypto";
 import { desktopRuntime } from './desktop-runtime';
 import { createPromptLibrary, PromptLibraryError } from './prompt-library';
@@ -1647,6 +1648,21 @@ async function handleApi(request: Request, url: URL): Promise<Response> {
     if (!currentUser || currentUser.id !== user.id || request.headers.get('X-Studio-Account') !== currentUser.id) return errorResponse('unauthenticated','The active account changed. Reload Settings.',401);
     if (!validCsrf(request)) return errorResponse('invalid_input','Refresh before changing browsing preferences.',403);
     return json(setBrowsingPreference(user.id,body.mode));
+  }
+
+  if (path === '/api/studio/v1/generation-services' && method === 'GET') {
+    const user = getCurrentUser(request);
+    if (!user || request.headers.get('X-Studio-Account') !== user.id) return errorResponse('unauthenticated','Connect your account to refresh generation models.',401);
+    const preference = getBrowsingPreference(user.id);
+    if (request.headers.get('X-Studio-Browsing') !== preference.revision) return errorResponse('browsing_changed','Browsing preferences changed. Refresh Settings first.',409);
+    if ([...url.searchParams.keys()].some(key=>key!=='refresh') || url.searchParams.has('refresh') && url.searchParams.get('refresh')!=='true') return errorResponse('invalid_input','Invalid model refresh option.',400);
+    try {
+      const connection = connectionStatus(user.id);
+      if(!connection || connection.status==='reconnect_required')return errorResponse('civitai_not_connected','Connect Civitai to refresh generation models.',403);
+      const result = await withDiscoveryLimit(user.id,()=>listGenerationServices(JSON.stringify([user.id,connection.revision,preference.revision]),url.searchParams.get('refresh')==='true',request.signal));
+      if (getCurrentUser(request)?.id !== user.id || connectionStatus(user.id)?.revision !== connection.revision || getBrowsingPreference(user.id).revision !== preference.revision) return errorResponse('browsing_changed','Your account or browsing preference changed. Refresh models again.',409);
+      return json(result);
+    } catch(error) { return errorResponse('provider_unavailable',error instanceof SiteError || error instanceof GenerationDiscoveryError ? error.message : 'Generation models could not be loaded. Check your connection.',error instanceof SiteError || error instanceof GenerationDiscoveryError ? error.status : 503); }
   }
 
   const favoriteMatch=/^\/api\/studio\/v1\/models\/(\d+)\/favorite$/.exec(path);

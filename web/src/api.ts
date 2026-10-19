@@ -1,4 +1,5 @@
 import type { TrainingDataset, TrainingResult, TrainingSettings } from '../../shared/training'
+import type { GenerationServices } from '../../shared/generation-services'
 import type { BrowsingMode, BrowsingPreference, ContentRating } from '../../shared/browsing'
 import type { ImageSource, SourceWorkflowRequest } from '../../shared/workflows'
 import type { GenerationPolicy, GenerationPreview, WorkflowOptions } from '../../shared/quotes'
@@ -122,6 +123,7 @@ export const studioApi = {
   submit: (previewId: string, accountId: string) => api<{ generation: Generation }>(`${base}/generations`, { method: 'POST', headers: { 'X-CSRF-Token': csrfToken, 'X-Studio-Account': accountId }, body: JSON.stringify({ previewId }) }),
   modelFavorite: (accountId:string,modelId:number,signal?:AbortSignal) => api<FavoriteState>(`${base}/models/${modelId}/favorite`,{signal,headers:{'X-Studio-Account':accountId}}),
   setModelFavorite: (accountId:string,modelId:number,setTo:boolean,requestId:string,signal?:AbortSignal) => api<FavoriteState>(`${base}/models/${modelId}/favorite`,{method:'PUT',signal,headers:{'X-CSRF-Token':csrfToken,'X-Studio-Account':accountId},body:JSON.stringify({setTo,requestId})}),
+  generationServices: (accountId:string,refresh=false,signal?:AbortSignal) => discovery<GenerationServices>(`${base}/generation-services${refresh?'?refresh=true':''}`,accountId,signal),
   searchModels: (accountId: string, filters: ModelFilters, signal?: AbortSignal) => discovery<{ items: ModelSearchResult[]; nextCursor: string | null }>(`${base}/models?${new URLSearchParams(Object.entries(filters).filter(([,value]) => Boolean(value)) as [string,string][]).toString()}`, accountId, signal),
   model: (accountId: string, id: number, signal?: AbortSignal) => discovery<{ model: ModelSearchResult }>(`${base}/models/${id}`, accountId, signal),
   modelVersion: (accountId: string, id: number, signal?: AbortSignal) => discovery<ModelVersion>(`${base}/model-versions/${id}`, accountId, signal),
