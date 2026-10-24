@@ -7,10 +7,32 @@
 </head>
 <body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#141517;color:#c1c2c5;font-family:system-ui,sans-serif">
   <main style="margin:24px;padding:32px 40px;background:#1a1b1e;border:1px solid #373a40;border-radius:12px;text-align:center">
-    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-      <path d="M16 4h32l12 12v32L48 60H16L4 48V16L16 4Z" fill="#228be6"/>
-      <path d="M22 16h24v8H26l-3 3v1h19l8 8v6l-8 8H18v-8h20l3-3v-3H22l-8-8v-4l8-8Z" fill="#fff"/>
-    </svg>
+    <svg width="64" height="64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Studio Fold: vector reproduction of the selected concept C. -->
+  <defs>
+    <linearGradient id="studio-fold-back" x1="80" y1="164" x2="192" y2="252" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2079da"/>
+      <stop offset="1" stop-color="#1765c6"/>
+    </linearGradient>
+    <linearGradient id="studio-fold-front" x1="72" y1="210" x2="330" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#258bfc"/>
+      <stop offset="1" stop-color="#2081f4"/>
+    </linearGradient>
+    <linearGradient id="studio-fold-upper" x1="224" y1="48" x2="402" y2="254" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6abaff"/>
+      <stop offset="1" stop-color="#5baff5"/>
+    </linearGradient>
+    <linearGradient id="studio-fold-right" x1="350" y1="232" x2="450" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#258bfc"/>
+      <stop offset="1" stop-color="#2080f2"/>
+    </linearGradient>
+  </defs>
+  <path d="m76 200 99-45c8-4 13-1 13 10v85L76 200Z" fill="url(#studio-fold-back)"/>
+  <path d="m76 200 241 110c12 6 17 15 17 28v116c0 13-6 17-17 12L79 359c-12-5-17-13-17-25V219c0-9 4-15 14-19Z" fill="url(#studio-fold-front)"/>
+  <path d="M220 57c0-11 6-16 17-11l197 87c21 9 21 27 3 37l-96 52c-5 3-7 6-7 13v26l-97-51c-12-6-17-14-17-27V57Z" fill="url(#studio-fold-upper)"/>
+  <path d="M348 239c0-12 6-16 17-11l73 35c9 4 12 12 12 23v51c0 11-4 18-14 24l-88 49V239Z" fill="url(#studio-fold-right)"/>
+</svg>
+
     <h1 style="margin:16px 0 8px;color:#f1f3f5;font-size:24px;font-weight:650">Civitai Studio</h1>
     <p style="margin:0;font-size:14px;line-height:1.5">Starting your local workspace…</p>
   </main>
