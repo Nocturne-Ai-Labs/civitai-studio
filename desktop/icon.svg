@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect x="16" y="16" width="480" height="480" rx="104" fill="#171717"/><path d="M356 148H212c-64 0-96 44-96 108s32 108 96 108h144v-64H218c-26 0-38-16-38-44s12-44 38-44h138z" fill="#a6e5b4"/><rect x="310" y="234" width="72" height="44" rx="10" fill="#a6e5b4"/></svg>
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Original angular S mark for Civitai Studio; not the Civitai logo. -->
+  <path d="M16 4h32l12 12v32L48 60H16L4 48V16L16 4Z" fill="#228be6"/>
+  <path d="M22 16h24v8H26l-3 3v1h19l8 8v6l-8 8H18v-8h20l3-3v-3H22l-8-8v-4l8-8Z" fill="#fff"/>
+</svg>

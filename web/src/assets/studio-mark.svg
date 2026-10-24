@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Original angular S mark for Civitai Studio; not the Civitai logo. -->
+  <path d="M16 4h32l12 12v32L48 60H16L4 48V16L16 4Z" fill="#228be6"/>
+  <path d="M22 16h24v8H26l-3 3v1h19l8 8v6l-8 8H18v-8h20l3-3v-3H22l-8-8v-4l8-8Z" fill="#fff"/>
+</svg>

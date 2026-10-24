@@ -1,4 +1,4 @@
-.onboarding-welcome { display:flex; flex:none; align-items:center; gap:12px; padding:12px 16px; margin-bottom:12px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.onboarding-welcome { display:flex; flex:none; align-items:center; gap:12px; padding:12px 16px; margin-bottom:12px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface); }
 .onboarding-welcome > svg { color:var(--accent-2); flex:none; }
 .onboarding-welcome > div:first-of-type { flex:1; min-width:0; }
 .onboarding-welcome strong { display:block; font-size:13px; font-weight:600; }
@@ -10,33 +10,33 @@
 .onboarding-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; list-style:none; margin:20px 0 0; padding:0; }
 .onboarding-steps li { min-width:0; }
 .onboarding-steps .button { display:flex; justify-content:flex-start; gap:8px; width:100%; height:auto; padding:9px 10px; color:var(--muted); font-size:12px; border:1px solid var(--line); border-radius:8px; }
-.onboarding-steps .button > span { display:grid; place-items:center; flex:none; width:21px; height:21px; border-radius:50%; background:#303030; font-variant-numeric:tabular-nums; }
+.onboarding-steps .button > span { display:grid; place-items:center; flex:none; width:21px; height:21px; border-radius:50%; background:var(--line); font-variant-numeric:tabular-nums; }
 .onboarding-steps .button[aria-current="step"] { background:var(--accent-soft); border-color:var(--accent); color:var(--accent-2); }
 .onboarding-step-body { min-height:300px; padding:22px 0; }
 .onboarding-step-count { display:block; font-size:11px; color:var(--muted); margin-bottom:9px; }
 .onboarding-step-body h3 { display:flex; align-items:center; gap:10px; font-size:19px; font-weight:600; line-height:1.4; margin-bottom:14px; outline:none; }
 .onboarding-step-body h3 > svg { flex:none; color:var(--accent-2); }
-.onboarding-step-body p { font-size:13px; line-height:1.65; color:#bdbdbd; }
-.onboarding-instructions { margin:16px 0 20px; padding-left:22px; color:#d2d2d2; font-size:13px; line-height:1.65; }
+.onboarding-step-body p { font-size:13px; line-height:1.65; color:var(--muted); }
+.onboarding-instructions { margin:16px 0 20px; padding-left:22px; color:var(--text-secondary); font-size:13px; line-height:1.65; }
 .onboarding-instructions li { margin-bottom:10px; padding-left:4px; }
 .onboarding-external { display:inline-flex; max-width:100%; height:auto; min-height:38px; white-space:normal; gap:8px; font-size:12px; text-decoration:none; }
 .onboarding-external > svg { flex:none; }
-.onboarding-key-note,.onboarding-ready-note { margin-top:16px; padding:12px; border:1px solid var(--line); border-radius:8px; background:#191919; }
-.onboarding-permissions { margin:0 0 16px; padding:12px; border:1px solid var(--line); border-radius:8px; color:#aaa; font-size:12px; line-height:1.6; }
-.onboarding-permissions summary { cursor:pointer; color:#ddd; font-weight:600; }.onboarding-permissions p { font-size:12px; margin:10px 0 6px; }.onboarding-permissions ul { padding-left:18px; margin:0; }.onboarding-permissions li { margin-bottom:5px; }
-.onboarding-connected { display:flex; align-items:center; gap:8px; margin-top:16px; color:#9fe0b0!important; }
+.onboarding-key-note,.onboarding-ready-note { margin-top:16px; padding:12px; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+.onboarding-permissions { margin:0 0 16px; padding:12px; border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:12px; line-height:1.6; }
+.onboarding-permissions summary { cursor:pointer; color:var(--text); font-weight:600; }.onboarding-permissions p { font-size:12px; margin:10px 0 6px; }.onboarding-permissions ul { padding-left:18px; margin:0; }.onboarding-permissions li { margin-bottom:5px; }
+.onboarding-connected { display:flex; align-items:center; gap:8px; margin-top:16px; color:var(--success)!important; }
 .onboarding-primary-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:18px; }
 .onboarding-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:16px; border-top:1px solid var(--line); }
 .onboarding-footer > div { display:flex; flex-wrap:wrap; gap:8px; }
 .onboarding-buzz-pools { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:16px 0; }
-.onboarding-buzz-pools > div { padding:13px; border:1px solid var(--line); border-radius:9px; background:#191919; min-width:0; }
-.onboarding-buzz-pools dt { display:flex; align-items:center; gap:7px; color:#ddd; font-size:13px; font-weight:600; }
+.onboarding-buzz-pools > div { padding:13px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface); min-width:0; }
+.onboarding-buzz-pools dt { display:flex; align-items:center; gap:7px; color:var(--text); font-size:13px; font-weight:600; }
 .onboarding-buzz-pools dt > span { width:9px; height:9px; flex:none; border-radius:50%; }
-.onboarding-buzz-blue dt > span { background:#76b8ff; }.onboarding-buzz-green dt > span { background:#86d8a5; }.onboarding-buzz-yellow dt > span { background:#f0d37e; }
+.onboarding-buzz-blue dt > span { background:var(--buzz-blue); }.onboarding-buzz-green dt > span { background:var(--buzz-green); }.onboarding-buzz-yellow dt > span { background:var(--buzz-yellow); }
 .onboarding-buzz-pools dd { margin:10px 0 0; }
-.onboarding-buzz-pools dd > strong { display:block; color:#ddd; font-size:11px; font-weight:600; }
-.onboarding-buzz-pools dd p { font-size:12px; line-height:1.6; margin-top:6px; color:#aaa; }
-.onboarding-buzz-note { margin-top:12px; font-size:12px!important; color:#aaa!important; }
+.onboarding-buzz-pools dd > strong { display:block; color:var(--text); font-size:11px; font-weight:600; }
+.onboarding-buzz-pools dd p { font-size:12px; line-height:1.6; margin-top:6px; color:var(--muted); }
+.onboarding-buzz-note { margin-top:12px; font-size:12px!important; color:var(--muted)!important; }
 .onboarding-sources { margin-top:12px; font-size:12px; color:var(--muted); }
 .onboarding-sources summary { cursor:pointer; }
 .onboarding-sources p { display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-top:10px; }
