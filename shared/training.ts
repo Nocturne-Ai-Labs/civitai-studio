@@ -8,7 +8,8 @@ export const trainingProfiles = {
 } as const
 export type TrainingProfile = (typeof trainingProfiles)[TrainingEcosystem]
 export type TrainingItem = { id:string; name:string; size:number; mime:string; hash:string; caption:string; status:'pending'|'uploading'|'ready'|'failed'|'uncertain'|'expired'; message?:string; blobId?:string; uploadedAt?:string }
-export type TrainingDataset = { id:string; name:string; revision:string; createdAt:string; items:TrainingItem[] }
+export type TrainingImageMetadata = { name:string; size:number; mime:string; hash:string; caption?:string }
+export type TrainingDataset = { id:string; name:string; revision:string; createdAt:string; items:TrainingItem[]; trainingSettings?:TrainingSettings }
 export type TrainingSettings = { ecosystem?:TrainingEcosystem; steps:number; triggerWord:string; prompts:string[] }
 export type TrainingReview = { profile?:TrainingProfile; datasetId:string; datasetName:string; revision:string; items:{name:string;caption:string}[]; settings:TrainingSettings }
 export type TrainingResult = { moderationStatus:string; epochs:{epochNumber:number; modelId:string|null; available:boolean; sampleIds:string[]}[] }
