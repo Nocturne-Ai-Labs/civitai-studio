@@ -60,7 +60,8 @@ if (!windows) await chmod(sidecar, 0o755)
 console.log('Compiled self-contained desktop service for ' + target)
 if (sidecarOnly) process.exit(0)
 
-const bundles = windows ? 'nsis' : mac ? 'dmg' : 'appimage,deb'
+// Keep the macOS app bundle as well as the DMG; ZIP staging needs the app.
+const bundles = windows ? 'nsis' : mac ? 'app,dmg' : 'appimage,deb'
 await run([process.execPath, '--no-env-file', join(root, 'node_modules', '@tauri-apps', 'cli', 'tauri.js'), 'build', '--target', target, '--bundles', bundles], join(root, 'desktop'))
 const nativeRelease = join(root, 'desktop', 'src-tauri', 'target', target, 'release')
 const output = join(root, 'releases', target)
