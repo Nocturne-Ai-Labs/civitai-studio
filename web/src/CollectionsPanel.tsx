@@ -1,90 +1,155 @@
-import { useEffect, useRef, useState } from 'react'
-import { ExternalLink, FolderPlus, RefreshCw, Search } from 'lucide-react'
-import type { CollectionDestination, CollectionType, CollectionVisibility, PublicCollection } from '../../shared/collections'
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { Bookmark, BookOpen, Box, Compass, ExternalLink, Folder, FolderHeart, Heart, ImageIcon, Link, Pencil, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
+import type { CollectionContribution, CollectionDestination, CollectionFollow, CollectionMutation, CollectionType, CollectionVisibility, PublicCollection, SiteCollectionSave } from '../../shared/collections'
 import { studioApi } from './api'
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle, Input, Textarea } from './ui'
 import { Select } from './controls'
-const message = (error: unknown) => error instanceof Error ? error.message : 'Collection action failed.'
-export function CollectionDestinations({ accountId, onChange, itemType }: { accountId: string; onChange?: () => void; itemType?: CollectionType }) {
-  const [items, setItems] = useState<CollectionDestination[]>([])
-  const [mode, setMode] = useState('create')
-  const [id, setId] = useState('')
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [type, setType] = useState<CollectionType>(itemType ?? 'Image')
-  const [read, setRead] = useState<CollectionVisibility>('Private')
-  const [confirmed, setConfirmed] = useState(false)
-  const [edit, setEdit] = useState<number | undefined>()
-  const [busy, setBusy] = useState(false)
-  const [notice, setNotice] = useState('')
-  const alive = useRef(true)
-  const mutations = useRef<AbortController[]>([])
-  useEffect(() => { alive.current = true; const controller = new AbortController(); void studioApi.collectionDestinations(accountId, controller.signal).then(result => { if (alive.current) setItems(result.items) }).catch(error => { if (!controller.signal.aborted) setNotice(message(error)) }); return () => { alive.current = false; controller.abort(); mutations.current.forEach(request => request.abort()) } }, [accountId])
-  async function refresh() {
-    setBusy(true)
-    try { const result = await studioApi.collectionDestinations(accountId); if (alive.current) { setItems(result.items); setNotice('Destinations refreshed.') } } catch (error) { if (alive.current) setNotice(message(error)) } finally { if (alive.current) setBusy(false) }
-  }
-  function reset() { setEdit(undefined); setMode('create'); setId(''); setName(''); setDescription(''); setType(itemType ?? 'Image'); setRead('Private'); setConfirmed(false) }
-  async function save() {
-    const controller = new AbortController(); mutations.current.push(controller)
-    setBusy(true); setNotice('')
-    try {
-      const result = await studioApi.saveCollectionDestination(accountId, { mode, id: Number(id), name, description, type, read, confirm: confirmed }, edit, controller.signal)
-      if (!alive.current) return
-      setItems(current => [result.destination, ...current.filter(item => item.id !== result.destination.id)])
-      setNotice(result.destination.source === 'saved' ? 'Destination saved for this account. Civitai will check add permission when you save an item.' : 'Civitai confirmed the collection. Destination saved.')
-      reset(); onChange?.()
-    } catch (error) { if (alive.current) setNotice(message(error)) } finally { if (alive.current) setBusy(false) }
-  }
-  return <section className="panel-card collection-panel" aria-label="Saved collection destinations"><div className="composer-actions"><h2 className="section-title">Saved destinations</h2><Button type="button" variant="ghost" size="icon" aria-label="Refresh saved destinations" disabled={busy} onClick={() => void refresh()}><RefreshCw size={14} /></Button></div>
-    <p className="field-help">Collections created here and IDs you explicitly save. This is not a list of all your Civitai collections. Private collections cannot be discovered through public REST.</p>
-    <div className="saved-destinations">{items.filter(item => !itemType || item.type === itemType).map(item => <article key={item.id}><strong>{item.name}</strong><p>{item.type} · {item.read} · #{item.id} · {item.source === 'created' ? 'Created in Studio' : item.verified ? 'Saved public destination' : 'User-supplied ID; not publicly verified'}</p><p>{item.description}</p><a href={`https://civitai.com/collections/${item.id}`} target="_blank" rel="noreferrer">Open on Civitai <ExternalLink size={12} /></a>{item.source === 'created' && <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={() => { setEdit(item.id); setMode('create'); setName(item.name); setDescription(item.description); setType(item.type); setRead(item.read) }}>Edit collection</Button>}</article>)}</div>
-    <h3 className="mt-4">{edit ? 'Update collection' : 'Add a destination'}</h3>
-    {!edit && <Select label="Collection destination action" value={mode} onChange={value => { setMode(value); setConfirmed(false) }} options={[{ value: 'create', label: 'Create a Civitai collection' }, { value: 'save', label: 'Save an existing collection ID' }]} />}
-    {mode === 'save' && <div className="form-field mt-3"><label className="field-label" htmlFor="collection-existing-id">Civitai collection ID</label><Input id="collection-existing-id" type="number" min={1} max={2147483647} value={id} onChange={event => setId(event.target.value)} /></div>}
-    <div className="form-field mt-3"><label className="field-label" htmlFor="collection-name">{mode === 'save' ? 'Destination label' : 'Collection name'}</label><Input id="collection-name" maxLength={30} value={name} onChange={event => setName(event.target.value)} /></div>
-    <div className="form-field"><label className="field-label" htmlFor="collection-description">Description</label><Textarea id="collection-description" maxLength={300} value={description} onChange={event => setDescription(event.target.value)} /></div>
-    <div className="field-row form-field"><Select label="Collection item type" value={type} disabled={!!edit || !!itemType} onChange={value => setType(value as CollectionType)} options={[{ value: 'Image', label: 'Image collection' }, { value: 'Post', label: 'Post collection' }, { value: 'Model', label: 'Model collection' }]} /><Select label="Collection visibility" value={read} onChange={value => setRead(value as CollectionVisibility)} options={['Private','Public','Unlisted'].map(value => ({ value, label: value }))} /></div>
-    {mode === 'save' ? <label className="collection-confirm"><input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} />I supplied this ID and have permission to add items. Private IDs cannot be verified until Civitai handles the action.</label> : <p className="field-help">This creates or updates a real Civitai collection. Write access stays Private. Collections Write permission is required.</p>}
-    <div className="composer-actions mt-3"><Button type="button" disabled={busy || !name.trim() || (mode === 'save' && (!confirmed || !Number.isInteger(Number(id)) || Number(id) < 1))} onClick={() => void save()}><FolderPlus size={14} />{busy ? 'Saving…' : edit ? 'Update collection' : mode === 'save' ? 'Save destination' : 'Create collection'}</Button>{edit && <Button type="button" variant="ghost" disabled={busy} onClick={reset}>Cancel edit</Button>}</div>
-    {notice && <p role="status" className="collection-message">{notice}</p>}
-  </section>
+import type { BrowsingController } from './BrowsingSettings'
+import './collections.css'
+
+const message=(error:unknown)=>error instanceof Error?error.message:'The collection request could not be completed.'
+const types:CollectionType[]=['Image','Model','Post','Article']
+const typeOptions=types.map(value=>({value,label:`${value} collection`}))
+const itemIcon=(type:string,size=24)=>type==='Model'?<Box size={size}/>:type==='Article'?<BookOpen size={size}/>:type==='Post'?<FolderHeart size={size}/>:<ImageIcon size={size}/>
+const CollectionBrowsingMode=createContext<'safe'|'pg13'|'mature'>('safe')
+function siteId(value:string,kind:'collections'|'articles'):number|null {
+ const input=value.trim();let id=input
+ if(!/^\d+$/.test(input))try{const url=new URL(input);if(url.protocol!=='https:'||!['civitai.com','www.civitai.com','civitai.red','www.civitai.red'].includes(url.hostname)||url.username||url.password||url.port)return null;const match=new RegExp(`^/${kind}/(\\d+)(?:/[^/]*)?/?$`).exec(url.pathname);if(!match)return null;id=match[1]!}catch{return null}
+ const number=Number(id);return Number.isInteger(number)&&number>0&&number<=2147483647?number:null
 }
-export function CollectionsPanel({ accountId, onConnect }: { accountId: string | null; onConnect: () => void }) {
-  const [query, setQuery] = useState('')
-  const [activeQuery, setActiveQuery] = useState('')
-  const [items, setItems] = useState<PublicCollection[]>([])
-  const [cursor, setCursor] = useState<number | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
-  const [detail, setDetail] = useState<PublicCollection | null>(null)
-  const [detailError, setDetailError] = useState('')
-  const [detailOpen, setDetailOpen] = useState(false)
-  const [revision, setRevision] = useState(0)
-  const requests = useRef<AbortController[]>([])
-  const detailRequest = useRef<AbortController | null>(null)
-  useEffect(() => {
-    if (!accountId) return
-    requests.current.forEach(controller => controller.abort()); requests.current = []
-    const controller = new AbortController(); requests.current.push(controller); setBusy(true); setError(''); setItems([]); setCursor(null)
-    void studioApi.publicCollections(accountId, activeQuery, undefined, controller.signal).then(result => { if (!controller.signal.aborted) { setItems(result.items); setCursor(result.nextCursor) } }).catch(error => { if (!controller.signal.aborted) setError(message(error)) }).finally(() => { if (!controller.signal.aborted) setBusy(false) })
-    return () => controller.abort()
-  }, [accountId, activeQuery, revision])
-  useEffect(() => () => requests.current.forEach(controller => controller.abort()), [])
-  async function more() {
-    if (!accountId || !cursor) return
-    const controller = new AbortController(); requests.current.push(controller); setBusy(true)
-    try { const result = await studioApi.publicCollections(accountId, activeQuery, cursor, controller.signal); if (!controller.signal.aborted) { setItems(current => [...new Map([...current, ...result.items].map(item => [item.id,item])).values()]); setCursor(result.nextCursor === cursor ? null : result.nextCursor) } } catch (error) { if (!controller.signal.aborted) setError(message(error)) } finally { if (!controller.signal.aborted) setBusy(false) }
-  }
-  async function show(id: number) {
-    if (!accountId) return
-    detailRequest.current?.abort()
-    const controller = new AbortController(); detailRequest.current = controller; requests.current.push(controller); setDetail(null); setDetailError(''); setDetailOpen(true)
-    try { const result = await studioApi.publicCollection(accountId, id, controller.signal); if (!controller.signal.aborted) setDetail(result.collection) } catch (error) { if (!controller.signal.aborted) setDetailError(message(error)) }
-  }
-  if (!accountId) return <section className="panel-card workspace-empty"><div className="empty-icon"><FolderPlus size={22}/></div><h2>Your inspiration, organized</h2><p>Connect your Civitai account to discover public collections and save your own destinations.</p><Button type="button" onClick={onConnect}>Connect account</Button></section>
-  return <div className="collections-workspace"><CollectionDestinations accountId={accountId} /><section className="panel-card collection-panel"><h2 className="section-title">Discover public collections</h2><p className="field-help">Public metadata only; private collections and collection contents are not exposed by this API. Open Civitai to view their contents.</p><div className="composer-actions mb-4"><Input aria-label="Search public collections" maxLength={100} placeholder="Collection name" value={query} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); setActiveQuery(query); setRevision(value => value + 1) } }} /><Button type="button" variant="secondary" disabled={busy} onClick={() => { setActiveQuery(query); setRevision(value => value + 1) }}><Search size={14} />Search</Button></div>
-    <div className="columns is-multiline collection-results">{items.map(item => <div className="column is-6-tablet is-4-desktop" key={item.id}><article className="model-card">{item.coverUrl && <div className="model-preview"><img src={item.coverUrl} alt="Collection cover" loading="lazy" referrerPolicy="no-referrer" /></div>}<div className="model-card-body"><h3>{item.name}</h3><p>{item.type} · by {item.creator}{item.itemCount !== null ? ` · ${item.itemCount} accepted items` : ''}</p><Button type="button" size="sm" variant="secondary" onClick={() => void show(item.id)}>Details</Button><a className="model-external" href={item.url} target="_blank" rel="noreferrer">Open on Civitai <ExternalLink size={12} /></a></div></article></div>)}</div>
-    {busy && <p role="status">Loading public collections…</p>}{!busy && !items.length && !error && <p>No public collections match.</p>}{error && <div className="error-box" role="alert">{error}<Button type="button" variant="secondary" onClick={() => setRevision(value => value + 1)}>Retry</Button></div>}{cursor && <Button type="button" variant="secondary" disabled={busy} onClick={() => void more()}>Load more</Button>}
-  </section><Dialog open={detailOpen} onOpenChange={setDetailOpen}><DialogContent><DialogTitle>{detail?.name ?? 'Collection details'}</DialogTitle><DialogDescription>Public collection metadata from Civitai.</DialogDescription>{detail ? <><p>{detail.type} · {detail.read} · #{detail.id} · {detail.creator}</p><p className="model-description">{detail.description || 'No description provided.'}</p>{['Image','Post','Model'].includes(detail.type) && <p>To use this destination, save its ID {detail.id} in Saved destinations with permission to add items.</p>}<a href={detail.url} target="_blank" rel="noreferrer">Open on Civitai</a></> : <p role="status">{detailError || 'Loading details…'}</p>}<div className="dialog-actions"><Button type="button" variant="secondary" onClick={() => setDetailOpen(false)}>Close</Button></div></DialogContent></Dialog></div>
+function External({id,url,children='Open on Civitai'}:{id:number;url?:string;children?:ReactNode}){const mode=useContext(CollectionBrowsingMode);return <a className="collection-external" href={url??`https://${mode==='mature'?'civitai.red':'civitai.com'}/collections/${id}`} target="_blank" rel="noreferrer">{children}<ExternalLink size={13}/></a>}
+function CollectionCard({item,children,onDetails}:{item:CollectionDestination|PublicCollection;children:ReactNode;onDetails:()=>void}) {
+ const saved='source' in item
+ return <article className="collection-folder-card">
+  <button type="button" className="collection-folder-cover" onClick={onDetails} aria-label={`View ${saved?item.label||item.name:item.name}`}>
+   {item.coverUrl?<img src={item.coverUrl} alt="" loading="lazy" referrerPolicy="no-referrer"/>:<><Folder className="collection-folder-outline" size={76} strokeWidth={1.15}/><span className="collection-folder-type-icon">{itemIcon(item.type,25)}</span></>}
+   <span className="collection-type-badge">{item.type||'Collection'}</span>
+  </button>
+  <div className="collection-folder-body"><button className="collection-name-button" onClick={onDetails}><h3>{saved?item.label||item.name:item.name}</h3></button>
+   <p className="collection-card-meta">{saved?`${item.read} · ${item.source==='created'?'Created in Studio':'Saved link'}`:`By ${item.creator||'Civitai creator'}`}</p>
+   <p className="collection-card-description">{item.description||'Keep your favorites together.'}</p>
+   <div className="collection-card-footer"><span>{item.itemCount!=null?`${item.itemCount.toLocaleString()} items`:'View items on Civitai'}</span><span>#{item.id}</span></div>
+   <div className="collection-card-actions">{children}</div>
+  </div>
+ </article>
+}
+type EditorProps={accountId:string;intent:'create'|'save'|'edit';initial?:CollectionDestination|PublicCollection;itemType?:CollectionType;onClose:()=>void;onSaved:(item:CollectionDestination)=>void;onAttempt:()=>void}
+function CollectionEditor({accountId,intent,initial,itemType,onClose,onSaved,onAttempt}:EditorProps) {
+ const prefix=useId(),[name,setName]=useState(initial?.name.slice(0,30)??''),[description,setDescription]=useState(initial?.description.slice(0,300)??''),[type,setType]=useState<CollectionType>(itemType??(types.includes(initial?.type as CollectionType)?initial!.type as CollectionType:'Image'))
+ const [id,setId]=useState(initial?String(initial.id):''),[read,setRead]=useState<CollectionVisibility>((initial?.read as CollectionVisibility)??'Private'),[write,setWrite]=useState<CollectionContribution>(initial&&'write' in initial?initial.write??'Private':'Private'),[nsfw,setNsfw]=useState(initial&&'nsfw' in initial?initial.nsfw??false:false)
+ const [confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[blocked,setBlocked]=useState(false)
+ const controller=useRef<AbortController|null>(null),sending=useRef(false)
+ useEffect(()=>()=>controller.current?.abort(),[])
+ const savingLink=intent==='save',needsConfirmation=savingLink||read!=='Private'||write!=='Private'
+ function changed(){setConfirmed(false)}
+ async function save(){
+  if(sending.current||blocked)return
+  const request=new AbortController();controller.current=request;sending.current=true;setBusy(true);setError('')
+  try{const result=await studioApi.saveCollectionDestination(accountId,{mode:savingLink?'save':'create',id:siteId(id,'collections')??0,name,description,type,read,write,nsfw,confirm:confirmed,...(intent==='edit'&&initial&&'revision'in initial?{revision:initial.revision}:{})},intent==='edit'?initial?.id:undefined,request.signal);if(!request.signal.aborted)onSaved(result.destination)}
+  catch(error){if(!request.signal.aborted){setError(message(error));setBlocked(true)}}finally{sending.current=false;if(!request.signal.aborted){setBusy(false);onAttempt()}}
+ }
+ return <Dialog open onOpenChange={open=>{if(!open&&!busy)onClose()}}><DialogContent className="collection-editor-dialog" closeDisabled={busy}>
+  <DialogTitle>{savingLink?'Save a collection link':intent==='edit'?'Edit Civitai collection':'Create a Civitai collection'}</DialogTitle>
+  <DialogDescription>{savingLink?'Keep a shortcut in Studio. This does not change the collection on Civitai.':'This changes a real collection on your Civitai account. Collections Write permission is required.'}</DialogDescription>
+  <form className="collection-editor-form" onSubmit={event=>{event.preventDefault();void save()}}>
+   {savingLink&&<label className="collection-field" htmlFor={`${prefix}-id`}><span>Collection link or ID</span><Input id={`${prefix}-id`} value={id} maxLength={500} placeholder="https://civitai.com/collections/123" disabled={busy||!!initial} onChange={event=>{setId(event.target.value);changed()}}/></label>}
+   <label className="collection-field" htmlFor={`${prefix}-name`}><span>{savingLink?'Name for an unlisted or private collection':'Collection name'}</span><Input id={`${prefix}-name`} value={name} maxLength={30} placeholder="My favorite styles" disabled={busy} onChange={event=>{setName(event.target.value);changed()}}/><small>{name.length}/30</small></label>
+   <label className="collection-field" htmlFor={`${prefix}-description`}><span>Description <small>Optional</small></span><Textarea id={`${prefix}-description`} value={description} maxLength={300} rows={3} disabled={busy} onChange={event=>{setDescription(event.target.value);changed()}}/></label>
+   <div className="columns is-mobile is-multiline collection-form-columns"><div className="column is-6"><span className="field-label">Items</span><Select label="Collection item type" value={type} options={typeOptions} disabled={busy||intent==='edit'||!!itemType} onChange={value=>{setType(value as CollectionType);changed()}}/></div><div className="column is-6"><span className="field-label">Who can view</span><Select label="Collection visibility" value={read} disabled={busy} options={[{value:'Private',label:'Only me'},{value:'Unlisted',label:'Anyone with the link'},{value:'Public',label:'Everyone'}]} onChange={value=>{setRead(value as CollectionVisibility);changed()}}/></div></div>
+   {!savingLink&&<><label className="collection-field"><span>Who can contribute</span><Select label="Collection contribution access" value={write} disabled={busy} options={[{value:'Private',label:'Only me'},{value:'Review',label:'Anyone · submissions need review'},{value:'Public',label:'Anyone · add directly'}]} onChange={value=>{setWrite(value as CollectionContribution);changed()}}/></label><label className="collection-confirm"><input type="checkbox" checked={nsfw} disabled={busy} onChange={event=>{setNsfw(event.target.checked);changed()}}/>Mark this collection as mature content</label><p className="field-help">Mature collections require mature browsing in Settings. Contribution review is managed on Civitai.</p></>}
+   {savingLink&&<p className="field-help">Public names and item types are checked with Civitai when available. For private or unlisted links, these details are yours to supply. Civitai checks permission when you add items.</p>}
+   {needsConfirmation&&<label className="collection-confirm"><input type="checkbox" checked={confirmed} disabled={busy} onChange={event=>setConfirmed(event.target.checked)}/>{savingLink?'Save this link to my Studio account.':`I confirm ${read==='Public'?'everyone':read==='Unlisted'?'anyone with the link':'only me'} can view it, and ${write==='Private'?'only I can add items':write==='Review'?'other people can submit items for review':'other people can add items directly'}.`}</label>}
+   {error&&<div role="alert" className="error-box">{error}{blocked&&<p>Close this dialog and review the saved action status before trying again.</p>}</div>}
+   <div className="dialog-actions"><Button type="button" variant="ghost" disabled={busy} onClick={onClose}>Cancel</Button><Button type="submit" disabled={busy||blocked||!name.trim()||savingLink&&!siteId(id,'collections')||needsConfirmation&&!confirmed}>{busy?'Saving…':savingLink?'Save link':intent==='edit'?'Save Civitai changes':'Create collection'}</Button></div>
+  </form>
+ </DialogContent></Dialog>
+}
+
+function FollowControls({accountId,id}:{accountId:string;id:number}) {
+ const [record,setRecord]=useState<CollectionFollow|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[revision,setRevision]=useState(0)
+ const request=useRef<AbortController|null>(null),sending=useRef(false)
+ useEffect(()=>{const controller=new AbortController();request.current=controller;setRecord(null);setError('');void studioApi.collectionFollow(accountId,id,controller.signal).then(result=>{if(!controller.signal.aborted)setRecord(result.follow)}).catch(error=>{if(!controller.signal.aborted)setError(message(error))});return()=>controller.abort()},[accountId,id,revision])
+ async function change(following:boolean){if(!record||sending.current)return;const controller=new AbortController();request.current=controller;sending.current=true;setBusy(true);setError('');try{const result=await studioApi.setCollectionFollow(accountId,id,record.revision,following,controller.signal);if(!controller.signal.aborted)setRecord(result.follow)}catch(error){if(!controller.signal.aborted){setError(message(error));setRecord(null)}}finally{sending.current=false;if(!controller.signal.aborted)setBusy(false)}}
+ useEffect(()=>()=>request.current?.abort(),[])
+ const locked=busy||!record||record.state==='running'||record.state==='uncertain'
+ return <section className="collection-detail-section"><h3><Heart size={16}/>Follow on Civitai</h3><p className="field-help">{record?.message??'Loading the last confirmed follow action…'}</p>
+  {record?.state==='confirmed'&&<span className="collection-state-pill">Last confirmed: {record.following?'Following':'Not following'}</span>}
+  <div className="collection-detail-actions"><Button type="button" variant="secondary" size="sm" disabled={locked||record?.state==='confirmed'&&record.following===true} onClick={()=>void change(true)}><Heart size={14}/>Follow</Button><Button type="button" variant="ghost" size="sm" disabled={locked||record?.state==='confirmed'&&record.following===false} onClick={()=>void change(false)}>Unfollow</Button><Button type="button" variant="ghost" size="sm" disabled={busy} onClick={()=>setRevision(value=>value+1)}><RefreshCw size={13}/>Reload status</Button></div>{error&&<p role="alert" className="error-box">{error}</p>}
+ </section>
+}
+function ArticleSave({accountId,destination}:{accountId:string;destination:CollectionDestination}) {
+ const [value,setValue]=useState(''),[record,setRecord]=useState<SiteCollectionSave|null>(null),[checked,setChecked]=useState(false),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('')
+ const request=useRef<AbortController|null>(null),sending=useRef(false),prefix=useId(),id=siteId(value,'articles')
+ useEffect(()=>()=>request.current?.abort(),[])
+ async function perform(save:boolean){if(!id||sending.current)return;const controller=new AbortController();request.current=controller;sending.current=true;setBusy(true);setError('');try{const result=save?await studioApi.saveSiteItem(accountId,{itemType:'Article',itemId:id,destinationId:destination.id,confirm:true},controller.signal):await studioApi.siteCollectionSave(accountId,'Article',id,destination.id,controller.signal);if(!controller.signal.aborted){setRecord(result.save);setChecked(true);setConfirmed(false)}}catch(error){if(!controller.signal.aborted){setError(message(error));setChecked(false)}}finally{sending.current=false;if(!controller.signal.aborted)setBusy(false)}}
+ return <section className="collection-detail-section"><h3><BookOpen size={16}/>Save an article here</h3><p className="field-help">Add an existing published Civitai article to this collection.</p><label className="collection-field" htmlFor={prefix}><span>Article link or ID</span><Input id={prefix} value={value} maxLength={500} disabled={busy} placeholder="https://civitai.com/articles/123" onChange={event=>{setValue(event.target.value);setChecked(false);setRecord(null);setConfirmed(false)}}/></label><Button variant="secondary" size="sm" disabled={!id||busy} onClick={()=>void perform(false)}>Check saved action</Button>
+  {checked&&<><p>{record?.message??`Ready to save article #${id} to ${destination.label||destination.name}.`}</p><label className="collection-confirm"><input type="checkbox" checked={confirmed} disabled={busy||!!record&&record.status!=='failed'} onChange={event=>setConfirmed(event.target.checked)}/>I confirm this article and collection.</label><Button size="sm" disabled={busy||!confirmed||!!record&&record.status!=='failed'} onClick={()=>void perform(true)}>Save article to Civitai collection</Button></>}{error&&<p role="alert" className="error-box">{error}</p>}
+ </section>
+}
+function CollectionDetails({accountId,item,onClose,onEdit,onSave,onLabel,onForget}:{accountId:string;item:CollectionDestination|PublicCollection;onClose:()=>void;onEdit?:()=>void;onSave?:()=>void;onLabel?:()=>void;onForget?:()=>void}) {
+ const saved='source'in item
+ return <Dialog open onOpenChange={open=>{if(!open)onClose()}}><DialogContent className="collection-detail-dialog"><DialogTitle>{saved?item.label||item.name:item.name}</DialogTitle><DialogDescription>{item.type} collection · {item.read} · #{item.id}</DialogDescription>
+  <div className="collection-detail-hero"><span>{itemIcon(item.type,38)}</span><div><strong>{item.itemCount!=null?`${item.itemCount.toLocaleString()} accepted items`:'A place for your favorites'}</strong><p>{saved?item.source==='created'?'Created through Studio':'Saved in Studio':`Curated by ${item.creator||'a Civitai creator'}`}</p></div></div>
+  <p className="collection-detail-description">{item.description||'No description provided.'}</p>
+  <div className="collection-detail-actions"><External id={item.id} url={'url'in item?item.url:undefined}>View contents on Civitai</External>{onSave&&<Button size="sm" onClick={onSave}><Bookmark size={14}/>Save collection link</Button>}{onEdit&&<Button size="sm" variant="secondary" onClick={onEdit}><Pencil size={14}/>Edit collection</Button>}</div>
+  <p className="field-help">Civitai’s public API provides collection details, but not private lists or the items inside. Use Civitai for contents, collaborators, contribution review, cover changes, and deleting a collection.</p>
+  {saved&&<section className="collection-detail-section"><h3><Folder size={16}/>Your Studio shortcut</h3><p className="field-help">{item.verified?'Collection details were confirmed when saved.':'This ID was supplied manually; its private details have not been verified.'}{item.label&&item.label!==item.name?` Civitai name: ${item.name}.`:''}</p><div className="collection-detail-actions"><Button variant="ghost" size="sm" onClick={onLabel}><Pencil size={13}/>Change local label</Button><Button variant="ghost" size="sm" onClick={onForget}><Trash2 size={13}/>Forget saved link</Button></div></section>}
+  {saved&&item.type==='Article'&&<ArticleSave accountId={accountId} destination={item}/>}
+  <FollowControls key={`${accountId}:${item.id}`} accountId={accountId} id={item.id}/>
+ </DialogContent></Dialog>
+}
+
+export function CollectionDestinations({accountId,onChange,itemType}:{accountId:string;onChange?:()=>void;itemType?:CollectionType}) {
+ const [items,setItems]=useState<CollectionDestination[]>([]),[pending,setPending]=useState<CollectionMutation[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState(''),[revision,setRevision]=useState(0),[query,setQuery]=useState(''),[type,setType]=useState<string>(itemType??'all'),[sort,setSort]=useState('recent')
+ const [editor,setEditor]=useState<{intent:EditorProps['intent'];item?:CollectionDestination}|null>(null),[detail,setDetail]=useState<CollectionDestination|null>(null),[local,setLocal]=useState<{kind:'label'|'forget';item:CollectionDestination}|null>(null),[label,setLabel]=useState(''),[busy,setBusy]=useState(false),[localError,setLocalError]=useState('')
+ const mutation=useRef<AbortController|null>(null),readRequest=useRef<AbortController|null>(null),sending=useRef(false)
+ useEffect(()=>{const controller=new AbortController();readRequest.current=controller;setLoading(true);setError('');void studioApi.collectionDestinations(accountId,controller.signal).then(result=>{if(!controller.signal.aborted){setItems(result.items);setPending(result.pendingActions??[])}}).catch(error=>{if(!controller.signal.aborted)setError(message(error))}).finally(()=>{if(!controller.signal.aborted)setLoading(false)});return()=>controller.abort()},[accountId,revision])
+ useEffect(()=>()=>mutation.current?.abort(),[accountId])
+ const reload=()=>setRevision(value=>value+1)
+ const visible=items.filter(item=>(type==='all'||item.type===type)&&`${item.label??''} ${item.name} ${item.description} ${item.id}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>sort==='name'?(a.label||a.name).localeCompare(b.label||b.name):sort==='items'?(b.itemCount??-1)-(a.itemCount??-1):b.id-a.id)
+ const createBlocked=pending.some(action=>action.collectionId===null)
+ async function localAction(){if(!local||sending.current)return;readRequest.current?.abort();setLoading(false);const controller=new AbortController();mutation.current=controller;sending.current=true;setBusy(true);setLocalError('');try{if(local.kind==='label'){const result=await studioApi.labelCollectionDestination(accountId,local.item,label,controller.signal);if(!controller.signal.aborted)setItems(current=>current.map(item=>item.id===result.destination.id?result.destination:item))}else{await studioApi.forgetCollectionDestination(accountId,local.item,controller.signal);if(!controller.signal.aborted)setItems(current=>current.filter(item=>item.id!==local.item.id))}if(!controller.signal.aborted){setNotice(local.kind==='label'?'Studio label updated.':'Saved link forgotten. The Civitai collection and its items are unchanged.');setLocal(null);onChange?.()}}catch(error){if(!controller.signal.aborted)setLocalError(message(error))}finally{sending.current=false;if(!controller.signal.aborted)setBusy(false)}}
+ function openLocal(kind:'label'|'forget',item:CollectionDestination){setDetail(null);setLocalError('');setLabel(item.label||item.name);setLocal({kind,item})}
+ return <section className="collections-saved" aria-label="Saved collection destinations">
+  <div className="collection-section-heading"><div><h2>{itemType?`${itemType} destinations`:'Saved collections'}</h2><p>Quick access to collections you create here or save by link.</p></div><div className="collection-heading-actions"><Button type="button" variant="secondary" size="sm" onClick={()=>setEditor({intent:'save'})}><Link size={14}/>Save link</Button><Button type="button" size="sm" disabled={createBlocked} onClick={()=>setEditor({intent:'create'})}><Plus size={15}/>New collection</Button><Button type="button" variant="ghost" size="icon" disabled={loading} aria-label="Refresh saved collections" onClick={reload}><RefreshCw size={15}/></Button></div></div>
+  <div className="collection-toolbar"><div className="collection-search"><Search size={16}/><Input aria-label="Search saved collections" placeholder="Search your saved collections" value={query} maxLength={100} onChange={event=>setQuery(event.target.value)}/></div>{!itemType&&<Select label="Filter saved collection type" value={type} onChange={setType} options={[{value:'all',label:'All types'},...typeOptions]}/>}<Select label="Sort saved collections" value={sort} onChange={setSort} options={[{value:'recent',label:'Newest collection'},{value:'name',label:'Name A–Z'},{value:'items',label:'Most items · last known'}]}/></div>
+  <p className="collection-scope-note">Saved links belong to your Studio account. This list does not automatically include every collection you own or follow on Civitai.</p>
+  {pending.length>0&&<div className="notice collection-pending" role="status"><strong>Check an unconfirmed Civitai change</strong>{pending.map((action,index)=><p key={`${action.collectionId}:${index}`}>{action.name}: {action.message} {action.collectionId&&<External id={action.collectionId}/>}</p>)}<p>You can save a known collection link without repeating the original creation.</p></div>}
+  {loading&&<p role="status" className="collection-loading">Loading saved collections…</p>}
+  {error&&<div className="error-box" role="alert">{error}<Button variant="secondary" size="sm" onClick={reload}>Retry loading</Button></div>}
+  {!loading&&!error&&!visible.length&&<div className="collection-empty"><FolderHeart size={42}/><h3>{items.length?'No matching collections':'Make room for inspiration'}</h3><p>{items.length?'Try another name or item type.':'Create your first collection or save one you already use on Civitai.'}</p>{!items.length&&<Button variant="secondary" onClick={()=>setEditor({intent:'save'})}>Save a collection link</Button>}</div>}
+  <div className="columns is-multiline collection-folder-grid">{visible.map(item=><div className="column is-6-tablet is-4-desktop" key={item.id}><CollectionCard item={item} onDetails={()=>setDetail(item)}><Button size="sm" variant="secondary" onClick={()=>setDetail(item)}>Manage</Button><External id={item.id}/></CollectionCard></div>)}</div>
+  {notice&&<p role="status" className="collection-message">{notice}</p>}
+  {editor&&<CollectionEditor key={`${editor.intent}:${editor.item?.id??'new'}`} accountId={accountId} intent={editor.intent} initial={editor.item} itemType={itemType} onClose={()=>setEditor(null)} onAttempt={reload} onSaved={item=>{readRequest.current?.abort();setLoading(false);setItems(current=>[item,...current.filter(old=>old.id!==item.id)]);setNotice(item.source==='saved'?'Collection link saved in Studio.':'Civitai confirmed the collection change.');setEditor(null);onChange?.()}}/>}
+  {detail&&<CollectionDetails accountId={accountId} item={detail} onClose={()=>setDetail(null)} onEdit={detail.source==='created'&&!pending.some(action=>action.collectionId===detail.id)?()=>{setEditor({intent:'edit',item:detail});setDetail(null)}:undefined} onLabel={()=>openLocal('label',detail)} onForget={()=>openLocal('forget',detail)}/>}
+  {local&&<Dialog open onOpenChange={open=>{if(!open&&!busy)setLocal(null)}}><DialogContent closeDisabled={busy}><DialogTitle>{local.kind==='label'?'Change Studio label':'Forget this saved link?'}</DialogTitle><DialogDescription>{local.kind==='label'?'This label changes only in Studio. The Civitai collection name stays the same.':'This removes the shortcut from Studio. It does not delete the Civitai collection, its items, or saved posting history.'}</DialogDescription>{local.kind==='label'?<Input aria-label="Local collection label" value={label} maxLength={80} disabled={busy} onChange={event=>setLabel(event.target.value)}/>:<p><strong>{local.item.label||local.item.name}</strong> · #{local.item.id}</p>}{localError&&<p role="alert" className="error-box">{localError}</p>}<div className="dialog-actions"><Button variant="ghost" disabled={busy} onClick={()=>setLocal(null)}>Cancel</Button><Button variant={local.kind==='forget'?'destructive':'default'} disabled={busy||local.kind==='label'&&!label.trim()} onClick={()=>void localAction()}>{busy?'Saving…':local.kind==='label'?'Save label':'Forget saved link'}</Button></div></DialogContent></Dialog>}
+ </section>
+}
+
+function DiscoverCollections({accountId}:{accountId:string}) {
+ const [query,setQuery]=useState(''),[sort,setSort]=useState<'Newest'|'Most Followers'>('Newest'),[type,setType]=useState('all'),[search,setSearch]=useState({query:'',sort:'Newest' as 'Newest'|'Most Followers',revision:0})
+ const [items,setItems]=useState<PublicCollection[]>([]),[cursor,setCursor]=useState<number|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[detail,setDetail]=useState<PublicCollection|null>(null),[saving,setSaving]=useState<PublicCollection|null>(null),[saved,setSaved]=useState<Set<number>>(new Set()),[notice,setNotice]=useState('')
+ const requests=useRef<AbortController[]>([]),savedRead=useRef<AbortController|null>(null),loading=useRef(false),seen=useRef(new Set<number>())
+ useEffect(()=>{requests.current.forEach(request=>request.abort());requests.current=[];const controller=new AbortController();requests.current.push(controller);setBusy(true);loading.current=true;setError('');setItems([]);setCursor(null);seen.current.clear();void studioApi.publicCollections(accountId,search.query,undefined,controller.signal,search.sort).then(result=>{if(!controller.signal.aborted){setItems(result.items);setCursor(result.nextCursor)}}).catch(error=>{if(!controller.signal.aborted)setError(message(error))}).finally(()=>{if(!controller.signal.aborted){setBusy(false);loading.current=false}});return()=>requests.current.forEach(request=>request.abort())},[accountId,search])
+ useEffect(()=>{const controller=new AbortController();savedRead.current=controller;void studioApi.collectionDestinations(accountId,controller.signal).then(result=>{if(!controller.signal.aborted)setSaved(new Set(result.items.map(item=>item.id)))}).catch(()=>{});return()=>controller.abort()},[accountId])
+ async function more(){if(!cursor||loading.current)return;const requested=cursor,controller=new AbortController();requests.current.push(controller);loading.current=true;setBusy(true);setError('');seen.current.add(requested);try{const result=await studioApi.publicCollections(accountId,search.query,requested,controller.signal,search.sort);if(!controller.signal.aborted){setItems(current=>[...new Map([...current,...result.items].map(item=>[item.id,item])).values()]);setCursor(result.nextCursor&&!seen.current.has(result.nextCursor)?result.nextCursor:null)}}catch(error){if(!controller.signal.aborted){seen.current.delete(requested);setError(message(error))}}finally{if(!controller.signal.aborted){setBusy(false);loading.current=false}}}
+ const visible=items.filter(item=>type==='all'||item.type===type)
+ return <section className="collections-discover"><div className="collection-section-heading"><div><h2>Discover collections</h2><p>Find ideas, styles, and curated work from the Civitai community.</p></div><span className="collection-state-pill"><Compass size={13}/>Public discovery</span></div>
+  <form className="collection-toolbar" onSubmit={event=>{event.preventDefault();setSearch({query,sort,revision:search.revision+1})}}><div className="collection-search"><Search size={16}/><Input aria-label="Search public collections" value={query} maxLength={100} placeholder="Search collections by name" onChange={event=>setQuery(event.target.value)}/></div><Select label="Sort public collections" value={sort} onChange={value=>{const next=value as typeof sort;setSort(next);setSearch({query,sort:next,revision:search.revision+1})}} options={[{value:'Newest',label:'Newest'},{value:'Most Followers',label:'Most followers'}]}/><Button type="submit" variant="secondary" disabled={busy}>Search</Button></form>
+  <div className="collection-type-filters" role="group" aria-label="Filter loaded collection types">{['all',...types].map(value=><Button key={value} size="sm" variant="ghost" className={type===value?'collection-filter-active':''} aria-pressed={type===value} onClick={()=>setType(value)}>{value==='all'?'All types':value}</Button>)}<span>Filters the loaded results</span></div>
+  <p className="collection-scope-note">Uses your browsing preference from Settings. Covers without an independent content rating stay hidden. {search.sort==='Most Followers'?'Civitai provides the first page only for this sort.':''}</p>
+  {error&&<div className="error-box" role="alert">{error}<Button size="sm" variant="secondary" onClick={()=>setSearch(current=>({...current,revision:current.revision+1}))}>Retry search</Button></div>}
+  {!busy&&!error&&!visible.length&&<div className="collection-empty"><Search size={38}/><h3>No matching collections</h3><p>{items.length?'Try another type, or load more results.':'Try a shorter search or another name.'}</p></div>}
+  <div className="columns is-multiline collection-folder-grid">{visible.map(item=><div className="column is-6-tablet is-4-desktop" key={item.id}><CollectionCard item={item} onDetails={()=>setDetail(item)}><Button size="sm" variant="secondary" onClick={()=>setDetail(item)}>Details</Button><Button size="sm" variant="ghost" disabled={saved.has(item.id)||!types.includes(item.type as CollectionType)} onClick={()=>setSaving(item)}><Bookmark size={13}/>{saved.has(item.id)?'Saved':'Save link'}</Button></CollectionCard></div>)}</div>
+  {busy&&<p role="status" className="collection-loading">Loading collections…</p>}{cursor&&<div className="collection-load-more"><Button variant="secondary" disabled={busy} onClick={()=>void more()}>Load more collections</Button></div>}{notice&&<p role="status">{notice}</p>}
+  {detail&&<CollectionDetails accountId={accountId} item={detail} onClose={()=>setDetail(null)} onSave={!saved.has(detail.id)&&types.includes(detail.type as CollectionType)?()=>{setSaving(detail);setDetail(null)}:undefined}/>}
+  {saving&&<CollectionEditor accountId={accountId} intent="save" initial={saving} onClose={()=>setSaving(null)} onAttempt={()=>{}} onSaved={item=>{savedRead.current?.abort();setSaved(current=>new Set([...current,item.id]));setSaving(null);setNotice(`${item.name} saved. Find it in Saved collections.`)}}/>}
+ </section>
+}
+export function CollectionsPanel({accountId,onConnect,browsing}:{accountId:string|null;onConnect:()=>void;browsing:BrowsingController}) {
+ const [tab,setTab]=useState<'saved'|'discover'>('saved')
+ if(!accountId)return <section className="panel-card workspace-empty"><div className="empty-icon"><FolderHeart size={24}/></div><h2>Your inspiration, organized</h2><p>Connect your account to save collection links, create collections, and discover curated work on Civitai.</p><Button onClick={onConnect}>Connect account</Button></section>
+ if(!browsing.settings)return <section className="panel-card workspace-empty"><FolderHeart size={28}/><p role={browsing.error?'alert':'status'}>{browsing.error||'Loading your browsing preference…'}</p>{browsing.error&&<Button variant="secondary" onClick={()=>void browsing.refresh()}>Retry loading preference</Button>}</section>
+ const scope=`${accountId}:${browsing.settings.revision}`
+ return <CollectionBrowsingMode.Provider value={browsing.settings.mode}><div className="collections-workspace collections-polished"><div className="collection-workspace-tabs" role="group" aria-label="Collection view"><Button variant="ghost" aria-pressed={tab==='saved'} className={tab==='saved'?'collection-tab-active':''} onClick={()=>setTab('saved')}><FolderHeart size={17}/>Saved collections</Button><Button variant="ghost" aria-pressed={tab==='discover'} className={tab==='discover'?'collection-tab-active':''} onClick={()=>setTab('discover')}><Compass size={17}/>Discover</Button></div>{tab==='saved'?<CollectionDestinations key={scope} accountId={accountId}/>:<DiscoverCollections key={scope} accountId={accountId}/>}</div></CollectionBrowsingMode.Provider>
 }

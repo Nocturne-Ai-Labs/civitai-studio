@@ -38,7 +38,7 @@ async function readRpc(response: Response, id: string, dispatched: boolean): Pro
     throw new McpError('Civitai MCP did not return the expected response ID.', dispatched)
   } finally { reader.releaseLock() }
 }
-export async function callCivitaiTool(key: BearerLease, name: 'upsert_collection' | 'add_to_collection' | 'upload_image' | 'create_post' | 'get_post' | 'publish_post' | 'toggle_favorite_model', args: Record<string, unknown>, options?: { uncertainAfterDispatch?: boolean; beforeDispatch?: () => void }): Promise<Record<string, any>> {
+export async function callCivitaiTool(key: BearerLease, name: 'upsert_collection' | 'follow_collection' | 'add_to_collection' | 'upload_image' | 'create_post' | 'get_post' | 'publish_post' | 'toggle_favorite_model', args: Record<string, unknown>, options?: { uncertainAfterDispatch?: boolean; beforeDispatch?: () => void }): Promise<Record<string, any>> {
   const callOptions = options
   let sessionId: string | null = null; let protocol = '2025-03-26'; let dispatched = false
   const headers = () => ({ Accept: 'application/json, text/event-stream', 'Content-Type': 'application/json', 'MCP-Protocol-Version': protocol, ...(sessionId ? { 'Mcp-Session-Id': sessionId } : {}) })

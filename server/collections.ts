@@ -1,8 +1,11 @@
 import { assertConnectionCurrent, ConnectionError, type BearerLease } from './connection'
 import { siteJson, SiteError } from './models'
-import type { CollectionDestination, CollectionTransfer, PublicCollection, SiteCollectionSave, CollectionType } from '../shared/collections'
+import type { CollectionDestination, CollectionTransfer, SiteCollectionSave, CollectionType } from '../shared/collections'
 import { db } from './storage'
 import { callCivitaiTool, McpError } from './civitai-mcp'
+import { collectionManagementApi, readPublicSiteCollectionResource } from './collection-management'
+import { getBrowsingPreference } from './browsing'
+import { contentRating, ratingAllowed } from '../shared/browsing'
 const maxImageBytes = 10 * 1024 * 1024
 const collectionsWrite = 262144, mediaWrite = 64
 const active = new Set<string>()
@@ -26,9 +29,6 @@ function keyFor(key: BearerLease, posting = false) {
 function destination(userId: string, id: number): CollectionDestination | null {
   const row = db.query<{ record_json: string }, [string, number]>('SELECT record_json FROM collection_destinations WHERE user_id=? AND collection_id=?').get(userId, id)
   return row ? JSON.parse(row.record_json) : null
-}
-function storeDestination(userId: string, record: CollectionDestination) {
-  db.query('INSERT INTO collection_destinations (user_id,collection_id,record_json) VALUES (?,?,?) ON CONFLICT(user_id,collection_id) DO UPDATE SET record_json=excluded.record_json').run(userId, record.id, JSON.stringify(record))
 }
 function storeTransfer(userId: string, record: StoredTransfer) {
   record.updatedAt = new Date().toISOString()
@@ -70,21 +70,6 @@ function publicTransfer(userId: string, record: StoredTransfer): CollectionTrans
   result.canReconcilePublication = !result.active && record.post === 'succeeded' && validId(record.sitePostId) && record.publication !== 'published'
   result.postUrl = validId(record.sitePostId) ? `https://civitai.com/posts/${record.sitePostId}` : null
   return result
-}
-const cleanText = (value: unknown, length: number) => typeof value === 'string' ? value.replace(/<[^>]*>/g, '').slice(0, length) : ''
-function publicCollection(value: any): PublicCollection {
-  if (!validId(value?.id)) throw new CollectionError('Civitai returned an invalid collection ID.', 502)
-  let coverUrl: string | null = null
-  try { const url = new URL(value.coverImageUrl); if (url.protocol === 'https:' && url.hostname === 'image.civitai.com' && !url.username && !url.password && !url.port) { url.search = ''; url.hash = ''; coverUrl = url.href } } catch { /* no cover */ }
-  return { id: value.id, name: cleanText(value.name, 100), description: cleanText(value.description, 1000), type: cleanText(value.type, 30), read: cleanText(value.read, 30), creator: cleanText(value.user?.username, 100), itemCount: Number.isInteger(value.itemCount) ? value.itemCount : null, coverUrl, url: `https://civitai.com/collections/${value.id}` }
-}
-async function publicRead(path: string): Promise<any> {
-  let response: Response
-  try { response = await fetch(`https://civitai.com/api/v1/collections${path}`, { headers: { Accept: 'application/json' }, redirect: 'error', signal: AbortSignal.timeout(15000) }) } catch { throw new CollectionError('Public collection discovery is unavailable. Try again later.', 502) }
-  if (response.status === 404) throw new CollectionError('This collection is private, unlisted or missing; public discovery cannot distinguish them.', 404)
-  if (response.status === 429) throw new CollectionError('Civitai is rate limiting public collection reads. Wait before retrying.', 429)
-  if (!response.ok) throw new CollectionError('Civitai could not load public collection metadata.', 502)
-  return response.json()
 }
 function checkImage(found: ReturnType<Dependencies['ownedOutput']>) {
   if (!found) throw new CollectionError('Generated output not found for this account.', 404)
@@ -128,7 +113,7 @@ async function runTransfer(userId: string, record: StoredTransfer, deps: Depende
   let phase: 'upload' | 'post' | 'membership' = 'upload'
   try {
     const dest = destination(userId, record.destinationId)
-    if (!dest || dest.type === 'Model' || dest.type !== record.destinationType) throw new CollectionError('The saved destination changed. No further action was sent.')
+    if (!dest || !['Image','Post'].includes(dest.type) || dest.type !== record.destinationType) throw new CollectionError('The saved destination changed. No further action was sent.')
     const found = checkImage(deps.ownedOutput(userId, record.outputId))
     if (record.upload !== 'succeeded') {
       record.upload = 'running'; record.message = 'Fetching and uploading the original image.'; storeTransfer(userId, record)
@@ -319,7 +304,8 @@ function getSiteSave(userId: string, itemType: CollectionType, itemId: number, d
 }
 async function siteSaveApi(request: Request, url: URL, userId: string, deps: Dependencies) {
   const body: Record<string, unknown> | null = request.method === 'GET' ? { itemType: url.searchParams.get('itemType'), itemId: Number(url.searchParams.get('itemId')), destinationId: Number(url.searchParams.get('destinationId')) } : await deps.readBody(request)
-  if (!body || !['Model','Image','Post'].includes(String(body.itemType)) || !validId(body.itemId) || !validId(body.destinationId)) throw new CollectionError('Choose a valid Site item and collection ID.')
+  assertConnectionCurrent(deps.connection)
+  if (!body || !['Model','Image','Post','Article'].includes(String(body.itemType)) || !validId(body.itemId) || !validId(body.destinationId)) throw new CollectionError('Choose a valid Site item and collection ID.')
   const itemType = body.itemType as CollectionType, itemId = body.itemId as number, destinationId = body.destinationId as number
   const previous = getSiteSave(userId,itemType,itemId,destinationId)
   if (request.method === 'GET') return json({ save: previous })
@@ -333,6 +319,7 @@ async function siteSaveApi(request: Request, url: URL, userId: string, deps: Dep
   activeSiteSaves.add(token)
   const record: SiteCollectionSave = { itemType,itemId,destinationId,status:'running',message:'Saving the existing Site item.',updatedAt:new Date().toISOString() }
   let attempted = false
+  let articleBrowsingRevision:string|undefined
   try {
     storeSiteSave(userId,record)
     // Verify the actual Site model/artwork and parent-post relationship using
@@ -340,6 +327,12 @@ async function siteSaveApi(request: Request, url: URL, userId: string, deps: Dep
     if (itemType === 'Model') {
       const model = await siteJson(key, `models/${itemId}`)
       if (model?.id !== itemId) throw new CollectionError('This Site model is unavailable.', 404)
+    } else if(itemType==='Article') {
+      const preference=getBrowsingPreference(userId)
+      articleBrowsingRevision=preference.revision
+      const article=await readPublicSiteCollectionResource(`articles/${itemId}`)
+      assertConnectionCurrent(key)
+      if(getBrowsingPreference(userId).revision!==preference.revision||article?.id!==itemId||article.status!=='Published'||!ratingAllowed(contentRating(article),preference.mode))throw new CollectionError('This published article is unavailable under your browsing preference or Civitai restrictions.',404)
     } else {
       const artworkId = itemType === 'Image' ? itemId : body.artworkId
       if (!validId(artworkId)) throw new CollectionError('A Site artwork ID is required to save its parent post.')
@@ -350,7 +343,7 @@ async function siteSaveApi(request: Request, url: URL, userId: string, deps: Dep
     assertConnectionCurrent(key)
     const current = destination(userId,destinationId)
     if (!current || current.type !== itemType) throw new CollectionError('The saved destination changed. No collection save was sent.',409)
-    const result = await callCivitaiTool(key,'add_to_collection',{ itemType,itemId,collectionIds:[destinationId] }, { uncertainAfterDispatch:true, beforeDispatch:()=>{ if(destination(userId,destinationId)?.type!==itemType || getSiteSave(userId,itemType,itemId,destinationId)?.status!=='running')throw new CollectionError('The saved item or destination changed.',409); attempted=true } })
+    const result = await callCivitaiTool(key,'add_to_collection',{ itemType,itemId,collectionIds:[destinationId] }, { uncertainAfterDispatch:true, beforeDispatch:()=>{ if(articleBrowsingRevision&&getBrowsingPreference(userId).revision!==articleBrowsingRevision)throw new CollectionError('Browsing preferences changed. Review the article again.',409); if(destination(userId,destinationId)?.type!==itemType || getSiteSave(userId,itemType,itemId,destinationId)?.status!=='running')throw new CollectionError('The saved item or destination changed.',409); attempted=true } })
     if (result.ok !== true || result.itemType !== itemType || result.itemId !== itemId || !Array.isArray(result.collectionIds) || result.collectionIds.length !== 1 || result.collectionIds[0] !== destinationId) throw new McpError('Civitai returned an incomplete collection-save acknowledgement.',true)
     record.status = 'succeeded'; record.message = 'Civitai MCP acknowledged this save. Open the collection to inspect visibility or any review requirements; private membership is not independently readable here.'
   } catch (error) {
@@ -361,56 +354,21 @@ async function siteSaveApi(request: Request, url: URL, userId: string, deps: Dep
     // Persist before releasing the lock. An interrupted running row is read as uncertain.
     try { storeSiteSave(userId,record) } finally { activeSiteSaves.delete(token) }
   }
+  assertConnectionCurrent(key)
+  if(articleBrowsingRevision&&getBrowsingPreference(userId).revision!==articleBrowsingRevision)throw new CollectionError('Browsing preferences changed. Reload the saved action status.',409)
   return json({ save: record })
 }
 const activeDestinations = new Set<string>()
 export async function collectionApi(request: Request, url: URL, userId: string, deps: Dependencies): Promise<Response> {
-  const destinationMutation = ['POST','PUT','DELETE'].includes(request.method) && url.pathname.includes('/collections/destinations')
+  const destinationMutation = ['POST','PUT','PATCH','DELETE'].includes(request.method) && url.pathname.includes('/collections/destinations')
   if (destinationMutation && activeDestinations.has(userId)) return json({error:{message:'A destination change is in progress. Wait before retrying.'}},409)
   if (destinationMutation) activeDestinations.add(userId)
   try {
     const path = url.pathname.slice('/api/studio/v1/collections'.length)
+    const managed=await collectionManagementApi(request,url,userId,deps)
+    if(managed)return managed
     if (path === '/batches' || path.startsWith('/batches/')) return await batchApi(request,path,userId,deps)
     if (path === '/site-saves' && ['GET','POST'].includes(request.method)) return await siteSaveApi(request,url,userId,deps)
-    if (request.method === 'GET' && path === '/public') {
-      const query = url.searchParams.get('query') ?? '', cursor = url.searchParams.get('cursor')
-      if (query.length > 100 || (cursor && !validId(Number(cursor)))) throw new CollectionError('Invalid public collection query or cursor.')
-      const params = new URLSearchParams({ limit: '20', query, sort: 'Newest', nsfw: 'false' }); if (cursor) params.set('cursor', cursor)
-      const result = await publicRead(`?${params}`)
-      return json({ items: (Array.isArray(result.items) ? result.items : []).slice(0,20).map(publicCollection), nextCursor: validId(result.metadata?.nextCursor) ? result.metadata.nextCursor : null })
-    }
-    if (request.method === 'GET' && /^\/public\/\d+$/.test(path)) { const id = Number(path.split('/').at(-1)); if (!validId(id)) throw new CollectionError('Invalid collection ID.'); return json({ collection: publicCollection(await publicRead(`/${id}`)) }) }
-    if (request.method === 'GET' && path === '/destinations') {
-      const rows = db.query<{ record_json: string }, [string]>('SELECT record_json FROM collection_destinations WHERE user_id=? ORDER BY collection_id DESC').all(userId)
-      return json({ items: rows.map(row => JSON.parse(row.record_json)) })
-    }
-    if ((request.method === 'POST' && path === '/destinations') || (request.method === 'PUT' && /^\/destinations\/\d+$/.test(path))) {
-      const body = await deps.readBody(request)
-      if (!body || typeof body.name !== 'string' || !body.name.trim() || body.name.trim().length > 30 || typeof body.description !== 'string' || body.description.length > 300 || !['Image','Post','Model'].includes(String(body.type)) || !['Private','Public','Unlisted'].includes(String(body.read))) throw new CollectionError('Choose Image, Post or Model, a name of 1–30 characters, a description up to 300 characters, and valid visibility.')
-      const existingId = request.method === 'PUT' ? Number(path.split('/').at(-1)) : null
-      if (existingId !== null && !validId(existingId)) throw new CollectionError('Invalid collection ID.')
-      const existing = existingId ? destination(userId, existingId) : null
-      if (existingId && (!existing || existing.source !== 'created')) throw new CollectionError('Only collections created by this account through Studio can be edited here.', 404)
-      if (existing && existing.type !== body.type) throw new CollectionError('Changing collection type is not supported. Create a separate destination.')
-      const record: CollectionDestination = { id: 0, name: body.name.trim(), description: body.description, type: body.type as CollectionDestination['type'], read: body.read as CollectionDestination['read'], source: body.mode === 'save' && !existing ? 'saved' : 'created', verified: false }
-      if (record.source === 'saved') {
-        if (!validId(body.id) || body.confirm !== true) throw new CollectionError('Supply a valid collection ID and confirm you have permission to add items.')
-        record.id = body.id
-        const prior = destination(userId, record.id)
-        if (prior) return json({ destination: prior })
-        try {
-          const remote = publicCollection(await publicRead(`/${record.id}`))
-          if (!['Image','Post','Model'].includes(remote.type)) throw new CollectionError('Studio supports Image, Post and Model destinations.')
-          record.name = remote.name; record.description = remote.description; record.type = remote.type as CollectionDestination['type']; record.read = 'Public'; record.verified = true
-        } catch (error) { if (!(error instanceof CollectionError && error.status === 404)) throw error }
-      } else {
-        const result = await callCivitaiTool(keyFor(deps.connection), 'upsert_collection', { ...(existingId ? { id: existingId } : {}), name: record.name, description: record.description, type: record.type, read: record.read, write: 'Private' }, {beforeDispatch:()=>{ assertConnectionCurrent(deps.connection); if(existingId && JSON.stringify(destination(userId,existingId))!==JSON.stringify(existing))throw new CollectionError('The destination changed before dispatch.',409) }})
-        if (result.ok !== true || !validId(result.id) || (existingId && result.id !== existingId)) throw new McpError('Civitai did not confirm a collection ID. Inspect Civitai before creating another collection.', true)
-        record.id = result.id; record.verified = true
-      }
-      if(record.source === "saved") assertConnectionCurrent(deps.connection);
-      storeDestination(userId, record); return json({ destination: record }, existing ? 200 : 201)
-    }
     const publicationMatch = /^\/transfers\/([^/]+)\/publication$/.exec(path)
     if (request.method === 'POST' && publicationMatch) {
       const outputId = decodeURIComponent(publicationMatch[1]!)
@@ -449,7 +407,7 @@ export async function collectionApi(request: Request, url: URL, userId: string, 
       if (!validId(body.destinationId) || typeof body.title !== 'string' || !body.title.trim() || body.title.length > 200 || (body.publish !== undefined && typeof body.publish !== 'boolean')) throw new CollectionError('Choose a saved destination, a title of 1–200 characters, and draft or publish.')
       const dest = destination(userId, body.destinationId)
       if (!dest) throw new CollectionError('Save this destination for your account before posting.', 404)
-      if (dest.type === 'Model') throw new CollectionError('Generated images require an Image or Post destination.')
+      if (dest.type !== 'Image' && dest.type !== 'Post') throw new CollectionError('Generated images require an Image or Post destination.')
       const record: StoredTransfer = { outputId, generationId: String(found.generation.id), destinationId: dest.id, destinationName: dest.name, destinationType: dest.type, title: body.title.trim(), publishRequested: body.publish === true, upload: 'pending', post: 'pending', membership: 'pending', publication: 'not-created', sitePostId: null, siteImageIds: [], message: 'Ready to upload the original.', active: false, canRetry: true, updatedAt: new Date().toISOString(), postUrl: null }
       storeTransfer(userId, record); start(userId, record, deps)
       return json({ transfer: publicTransfer(userId, record) }, 202)

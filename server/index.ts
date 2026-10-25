@@ -25,6 +25,7 @@ import { listGenerationServices, GenerationDiscoveryError } from './generation-s
 import { createHash, randomBytes } from "node:crypto";
 import { desktopRuntime } from './desktop-runtime';
 import { createPromptLibrary, PromptLibraryError } from './prompt-library';
+import { createMediaLibrary, MediaLibraryError } from './library';
 import { resolve, sep } from "node:path";
 import { lookup } from 'node:dns/promises';
 import { BlockList } from 'node:net';
@@ -37,6 +38,7 @@ import {
 
 const port = Number(process.env.PORT ?? 6969);
 const promptLibrary = createPromptLibrary(db);
+const mediaLibrary = createMediaLibrary(db);
 const production = process.env.NODE_ENV === "production";
 const desktop = desktopRuntime();
 let publicBase = new URL(process.env.PUBLIC_BASE_URL ?? `http://localhost:${port}`);
@@ -1566,6 +1568,19 @@ async function handleApi(request: Request, url: URL): Promise<Response> {
     const user = getCurrentUser(request);
     if (!user) return errorResponse("unauthenticated", "Connect your Civitai account first.", 401);
     return accountBuzzBalance(user.id);
+  }
+
+  if (path === '/api/studio/v1/library' || path.startsWith('/api/studio/v1/library/')) {
+    const user = getCurrentUser(request);
+    if (!user || request.headers.get('X-Studio-Account') !== user.id) return errorResponse('unauthenticated','Reload the library for the active account.',401);
+    const localPath = path.slice('/api/studio/v1/library'.length);
+    if (method === 'GET' && !localPath) return json(mediaLibrary.read(user.id));
+    if (!['POST','PATCH','PUT','DELETE'].includes(method)) return errorResponse('unsupported_action','Unsupported library action.',405);
+    if (!validCsrf(request)) return errorResponse('invalid_input','Refresh before changing library folders.',403);
+    const body = await readBody(request,98_304);
+    if (getCurrentUser(request)?.id !== user.id || request.headers.get('X-Studio-Account') !== user.id || !validCsrf(request)) return errorResponse('unauthenticated','The active session changed. Reload your library.',401);
+    try { return json(mediaLibrary.mutate(user.id,method,localPath,body)); }
+    catch(error) { if (error instanceof MediaLibraryError) return errorResponse(error.status === 404 ? 'not_found' : 'invalid_input',error.message,error.status); throw error; }
   }
 
   if (path.startsWith('/api/studio/v1/prompt-library/')) {

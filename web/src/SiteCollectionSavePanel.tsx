@@ -5,7 +5,7 @@ import { Button } from './ui'
 import { Select } from './controls'
 import { CollectionDestinations } from './CollectionsPanel'
 const message = (error: unknown) => error instanceof Error ? error.message : 'The Site save is unavailable.'
-const itemUrl = (item: SiteCollectionItem) => `https://civitai.com/${item.itemType === 'Model' ? 'models' : item.itemType === 'Post' ? 'posts' : 'images'}/${item.itemId}`
+const itemUrl = (item: SiteCollectionItem) => `https://civitai.com/${item.itemType === 'Model' ? 'models' : item.itemType === 'Post' ? 'posts' : item.itemType === 'Article' ? 'articles' : 'images'}/${item.itemId}`
 export function SiteCollectionSavePanel({ accountId, choices, onBack }: { accountId: string; choices: SiteCollectionItem[]; onBack: () => void }) {
   const [choice, setChoice] = useState(0)
   const item = choices[choice] ?? choices[0]!
@@ -59,7 +59,7 @@ export function SiteCollectionSavePanel({ accountId, choices, onBack }: { accoun
     <p>This saves a reference to an existing Civitai item. It does not upload media, create a post, copy a prompt or generate anything.</p>
     {choices.length > 1 && <Select label="Site item to save" value={String(choice)} disabled={busy} options={choices.map((choice,index) => ({ value:String(index),label:choice.itemType === 'Post' ? `Parent post #${choice.itemId}` : `Artwork #${choice.itemId}` }))} onChange={value => { setChoice(Number(value)); setManage(false); setConfirmed(false) }} />}
     <div className="notice"><strong>{item.label}</strong><p>{item.itemType} #{item.itemId}</p><a href={itemUrl(item)} target="_blank" rel="noreferrer">Open Site item</a></div>
-    <p className="field-help">{item.itemType === 'Model' ? 'Uses the Site model ID, not a model-version ID.' : item.itemType === 'Image' ? 'Site images and videos both use Image collection membership.' : 'Saves the existing parent post, which may contain other artwork.'}</p>
+    <p className="field-help">{item.itemType === 'Model' ? 'Uses the Site model ID, not a model-version ID.' : item.itemType === 'Image' ? 'Site images and videos both use Image collection membership.' : item.itemType === 'Article' ? 'Saves an existing published Civitai article; private articles and drafts cannot be checked here.' : 'Saves the existing parent post, which may contain other artwork.'}</p>
     <Select label="Matched saved destination" value={destinationId} disabled={busy} options={[{ value:'none',label:`Choose a saved ${item.itemType} collection` },...destinations.map(dest => ({ value:String(dest.id),label:`${dest.name} · #${dest.id}` }))]} onChange={value => { setDestinationId(value); setConfirmed(false); setChecked(false) }} />
     {!destinations.length && <p>No saved {item.itemType} destinations. Create one or save an existing collection ID below.</p>}
     {dest && <p>Destination: <a href={`https://civitai.com/collections/${dest.id}`} target="_blank" rel="noreferrer">{dest.name} · #{dest.id}</a> ({dest.type}, {dest.read}). {dest.verified ? '' : 'User-supplied private/unlisted ID; Civitai checks permission.'}</p>}
