@@ -17,10 +17,51 @@ coverage/
 bun-error.log*
 
 # Local configuration and credentials
-.env
-.env.*
+.[eE][nN][vV]
+.[eE][nN][vV].*
 !.env.example
+.envrc
+.envrc.*
+.direnv/
 *.local
+
+# Local agent instructions, skills, tool connections, and editor state
+.[aA][gG][eE][nN][tT]/
+.[aA][gG][eE][nN][tT][sS]/
+.[cC][oO][dD][eE][xX]/
+.[cC][lL][aA][uU][dD][eE]/
+.[cC][uU][rR][sS][oO][rR]/
+.[sS][kK][iI][lL][lL][sS]/
+[sS][kK][iI][lL][lL][sS]/
+.github/agents/
+.github/skills/
+.github/instructions/
+.[mM][cC][pP].json
+[mM][cC][pP].json
+.vscode/
+.idea/
+*.code-workspace
+*.suo
+*.user
+*.swp
+*.swo
+*~
+*.pdb
+*.dmp
+
+# Local verification output and scratch work
+.cache/
+/tmp/
+/temp/
+/scratch/
+/qa/
+playwright-report/
+test-results/
+.nyc_output/
+__pycache__/
+*.pyc
+.venv/
+venv/
 
 # Private credentials and encryption/signing key files
 *.[kK][eE][yY]
@@ -29,13 +70,20 @@ bun-error.log*
 *.[pP][fF][xX]
 id_rsa
 id_ed25519
+.secrets/
+secrets/
+.credentials/
+credentials/
+*.keystore
+*.jks
+*.p8
 [sS][eE][cC][rR][eE][tT][sS].json
 [cC][rR][eE][dD][eE][nN][tT][iI][aA][lL][sS].json
 [aA][pP][iI]-[kK][eE][yY].*
 [aA][pP][iI][kK][eE][yY].*
 [cC][iI][vV][iI][tT][aA][iI]-[aA][pP][iI]-[kK][eE][yY].*
 
-# Documentation stays local, including mixed-case Markdown extensions
+# Markdown stays local, including AGENT.md, AGENTS.md, SKILL.md and mixed case
 *.[mM][dD]
 *.[mM][dD][xX]
 *.[mM][aA][rR][kK][dD][oO][wW][nN]
@@ -76,11 +124,18 @@ playwright.config.*
 /downloads/
 /data/
 /server/data/
+/outputs/
+/datasets/
+/profiles/
+/profile-v1/
 *.sqlite
 *.sqlite3
 *.db
 *.db-shm
 *.db-wal
+*.dump
+*.har
+*.bak
 
 # Logs and operating-system files
 *.log
