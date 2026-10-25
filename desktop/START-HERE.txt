@@ -20,8 +20,9 @@ The installer can download the runtime; the portable ZIP does not bundle it.
 
 MACOS
 Open the app from the ZIP or DMG. Use the download for your processor (Intel
-or Apple Silicon). macOS 12 or later is required. This beta is not notarized;
-Gatekeeper may block it. macOS builds need native-runner validation.
+or Apple Silicon). macOS 13 or later is required. This beta is not notarized;
+Gatekeeper may block it. Hands-on macOS desktop and installer compatibility
+still needs validation by Mac testers.
 
 LINUX
 Prefer the AppImage or .deb. AppImages may require FUSE2; the raw tar archive

@@ -75,6 +75,85 @@ jobs:
           APPLE_SIGNING_IDENTITY: '-'
         run: bun desktop:release --target ${{ matrix.target }}
 
+      - name: Verify packaged service startup
+        if: runner.os != 'Windows'
+        shell: python {0}
+        env:
+          RELEASE_TARGET: ${{ matrix.target }}
+        run: |
+          import base64, hashlib, json, os, pathlib, plistlib, secrets, select
+          import subprocess, tarfile, tempfile, urllib.error, urllib.request, zipfile
+
+          target = os.environ['RELEASE_TARGET']
+          output = pathlib.Path('releases') / target
+          manifest = json.loads((output / 'release-manifest.json').read_text())
+          mac = target.endswith('-apple-darwin')
+          extension = '.zip' if mac else '.tar.gz'
+          archive = output / f"Civitai-Studio-{manifest['version']}-{target}{extension}"
+          with tempfile.TemporaryDirectory(prefix='civitai-release-check-') as temporary:
+              temporary = pathlib.Path(temporary)
+              service = temporary / 'studio-service'
+              if mac:
+                  with zipfile.ZipFile(archive) as package:
+                      names = [name for name in package.namelist() if name.endswith('/Civitai Studio.app/Contents/MacOS/studio-service') and not name.startswith('__MACOSX/')]
+                      assert len(names) == 1, 'Packaged service is missing or duplicated'
+                      service.write_bytes(package.read(names[0]))
+              else:
+                  with tarfile.open(archive, 'r:gz') as package:
+                      members = [member for member in package.getmembers() if member.name == 'Civitai Studio/studio-service']
+                      assert len(members) == 1 and members[0].isfile(), 'Packaged service is missing or duplicated'
+                      service.write_bytes(package.extractfile(members[0]).read())
+              service.chmod(0o755)
+              if mac:
+                  subprocess.run(['/usr/bin/codesign', '--verify', '--strict', str(service)], check=True, capture_output=True)
+                  signing = subprocess.run(['/usr/bin/codesign', '-d', '--entitlements', ':-', str(service)], check=True, capture_output=True)
+                  entitlements = plistlib.loads(signing.stdout)
+                  assert entitlements == {'com.apple.security.cs.allow-jit': True}, 'Unexpected packaged service entitlements'
+              profile = temporary / 'profile'
+              profile.mkdir()
+              gate_name, gate = 'studio_desktop_' + secrets.token_hex(16), secrets.token_hex(32)
+              environment = {name: os.environ[name] for name in ['TMPDIR', 'LANG', 'LC_ALL'] if name in os.environ}
+              process = subprocess.Popen([str(service)], cwd=temporary, env=environment, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+              try:
+                  bootstrap = {'dataDir': str(profile), 'encryptionKey': base64.b64encode(os.urandom(32)).decode(), 'gateName': gate_name, 'gate': gate}
+                  process.stdin.write((json.dumps(bootstrap) + '\n').encode())
+                  process.stdin.flush()
+                  assert select.select([process.stdout], [], [], 30)[0], 'Packaged service startup timed out'
+                  line = process.stdout.readline(257)
+                  assert len(line) <= 256, 'Unexpected service readiness record'
+                  ready = json.loads(line)
+                  assert ready.get('desktopReady') == 1 and 0 < ready.get('port', 0) < 65536, 'Packaged service did not start'
+                  origin = 'http://127.0.0.1:' + str(ready['port'])
+                  cookie = gate_name + '=' + gate
+
+                  def request(path, headers=None):
+                      try:
+                          with urllib.request.urlopen(urllib.request.Request(origin + path, headers=headers or {}), timeout=10) as response:
+                              return response.status, response.read()
+                      except urllib.error.HTTPError as error:
+                          return error.code, error.read()
+
+                  for route in ['/', '/healthz', '/api/studio/v1/session']:
+                      assert request(route)[0] == 403, 'Missing-cookie request was accepted'
+                  for asset in manifest['frontend']:
+                      path = '/' if asset['path'] == '/index.html' else asset['path']
+                      assert path == '/' or path.startswith('/assets/'), 'Unexpected frontend path'
+                      status, content = request(path, {'Cookie': cookie})
+                      assert status == 200 and len(content) == asset['bytes'] and hashlib.sha256(content).hexdigest() == asset['sha256'], 'Packaged frontend differs from release manifest'
+                  status, content = request('/api/studio/v1/session', {'Cookie': cookie})
+                  session = json.loads(content)
+                  assert status == 200 and session['connected'] is False and session['user'] is None, 'Release contains an account'
+                  assert session['credentialStorage']['mode'] == 'encrypted' and session['credentialStorage']['persistent'] is True, 'Encrypted persistence unavailable'
+                  for extra in [{'Origin': 'https://example.invalid'}, {'Host': 'example.invalid'}, {'Sec-Fetch-Site': 'cross-site'}]:
+                      assert request('/api/studio/v1/session', {'Cookie': cookie, **extra})[0] == 403, 'Cross-origin request was accepted'
+                  process.stdin.close()
+                  assert process.wait(timeout=10) == 0, 'Packaged service did not stop cleanly'
+                  print(('macOS signed' if mac else 'Linux') + ' packaged service startup, embedded assets, fresh encrypted profile, request isolation, and shutdown passed. No provider credentials or requests used.')
+              finally:
+                  if process.poll() is None:
+                      process.kill()
+                      process.wait(timeout=10)
+
       - name: Upload release files only
         uses: actions/upload-artifact@v7
         with:
