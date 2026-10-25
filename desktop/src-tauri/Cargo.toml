@@ -1,9 +1,9 @@
 [package]
 name = "civitai-studio-desktop"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 description = "Civitai Studio beta desktop wrapper"
 edition = "2021"
-rust-version = "1.88"
+rust-version = "1.90"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
@@ -19,8 +19,14 @@ open = "5"
 rfd = "0.15"
 fs2 = "0.4"
 cookie = "0.18"
+semver = "1.0.28"
+reqwest = { version = "0.13.5", default-features = false, features = ["json", "rustls-no-provider"] }
+tokio = { version = "1.54.1", features = ["time", "sync"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+time = { version = "0.3", features = ["formatting"] }
 
 [target.'cfg(windows)'.dependencies]
+windows-registry = "0.6.1"
 windows-sys = { version = "0.61", features = ["Win32_Security_Cryptography", "Win32_Foundation", "Win32_System_Memory"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
@@ -28,6 +34,9 @@ keyring = { version = "3.6.3", default-features = false, features = ["apple-nati
 
 [target.'cfg(target_os = "linux")'.dependencies]
 keyring = { version = "3.6.3", default-features = false, features = ["sync-secret-service", "crypto-rust", "vendored"] }
+
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-updater = { version = "=2.14.0", default-features = false, features = ["rustls-tls"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

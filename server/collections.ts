@@ -3,7 +3,7 @@ import { siteJson, SiteError } from './models'
 import type { CollectionDestination, CollectionTransfer, SiteCollectionSave, CollectionType } from '../shared/collections'
 import { db } from './storage'
 import { callCivitaiTool, McpError } from './civitai-mcp'
-import { collectionManagementApi, readPublicSiteCollectionResource } from './collection-management'
+import { collectionManagementApi, collectionManagementBusy, readPublicSiteCollectionResource } from './collection-management'
 import { getBrowsingPreference } from './browsing'
 import { contentRating, ratingAllowed } from '../shared/browsing'
 const maxImageBytes = 10 * 1024 * 1024
@@ -359,6 +359,7 @@ async function siteSaveApi(request: Request, url: URL, userId: string, deps: Dep
   return json({ save: record })
 }
 const activeDestinations = new Set<string>()
+export const collectionWorkBusy = () => active.size > 0 || activeSiteSaves.size > 0 || activeDestinations.size > 0 || collectionManagementBusy()
 export async function collectionApi(request: Request, url: URL, userId: string, deps: Dependencies): Promise<Response> {
   const destinationMutation = ['POST','PUT','PATCH','DELETE'].includes(request.method) && url.pathname.includes('/collections/destinations')
   if (destinationMutation && activeDestinations.has(userId)) return json({error:{message:'A destination change is in progress. Wait before retrying.'}},409)

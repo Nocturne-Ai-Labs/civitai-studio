@@ -1,0 +1,19 @@
+.desktop-update-version { display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;flex-wrap:wrap; }
+.desktop-update-version strong { color:var(--text);font-size:13px; }
+.desktop-update-version > span { color:var(--muted);font-size:11px;border:1px solid var(--line);padding:3px 7px;border-radius:5px; }
+.desktop-updates-card .desktop-update-status { display:flex;align-items:center;gap:8px; }
+.desktop-update-status > svg { flex:none;color:var(--accent-2); }
+.desktop-update-release { margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:6px;background:var(--surface-inset);overflow-wrap:anywhere; }
+.desktop-update-release > strong { font-size:13px;color:var(--text); }
+.desktop-release-link { display:inline-flex;align-items:center;gap:6px;min-height:32px;font-size:12px;color:var(--accent-2);text-decoration:none; }
+.desktop-release-link:hover { text-decoration:underline; }
+.desktop-update-progress { display:flex;flex-direction:column;gap:7px;margin:14px 0;color:var(--muted);font-size:11px; }
+.desktop-update-progress progress { width:100%;height:8px;accent-color:var(--accent); }
+.desktop-updates-card .desktop-update-busy { color:var(--text-secondary);border-left:2px solid var(--accent-2);padding-left:10px; }
+.desktop-updates-card .desktop-update-checked { font-size:11px;color:var(--muted); }
+.desktop-update-actions { flex-wrap:wrap; }
+.desktop-update-actions .button { white-space:normal; }
+.header-update-button { color:var(--accent-2);border-color:var(--accent-border); }
+.desktop-update-restarting { position:fixed;inset:0;z-index:10000;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:24px;text-align:center;color:var(--text); }
+.desktop-update-restarting > svg { color:var(--accent-2); }
+.desktop-update-restarting > p { color:var(--muted);margin:0; }

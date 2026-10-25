@@ -1,7 +1,7 @@
 import { outputCategory, type OutputCategory } from '../shared/output-folders';
 import { autoSettings, destinationActivated, initializeAutoSave, retryAutoSave, setAutoSave } from './auto-save';
 import { favoriteApi } from './favorites';
-import { configureLocalDestination, localSettings, startLocalSave } from './local-storage';
+import { configureLocalDestination, localSettings, startLocalSave, localOutputWorkBusy } from './local-storage';
 import { withAccountConnection, resolveBearer, providerFetch, assertConnectionCurrent, connectionCurrent, connectionStatus, ConnectionError, type BearerLease } from './connection';
 import { oauthAvailability, OAUTH_CALLBACK, disconnectOAuth, beginOAuth, consumeOAuth, exchangeOAuth, installOAuth, revokeToken, ensureOAuthBrowser, oauthBrowserCurrent, invalidateOAuthBrowser, oauthCallbackMatches } from './oauth';
 import { trainingApi, prepareTraining, validateTrainingQuote } from './training';
@@ -18,12 +18,16 @@ import { checkDraftResources, prepareDraft, validateDraft } from './draft-workfl
 import { requireImageGraphQualification } from './image-graphs';
 import { graphOperations } from '../shared/image-workflows';
 import { musicProviderInput, musicProviderProblem } from '../shared/music';
-import { collectionApi } from './collections';
+import { collectionApi, collectionWorkBusy } from './collections';
 import { configError, promptLimit, parseAir, type ComposerConfig } from '../shared/composer';
 import { publicModel, resolveModelVersion, siteJson, SiteError, validateGenerationResources, withDiscoveryLimit } from './models';
 import { listGenerationServices, GenerationDiscoveryError } from './generation-services';
 import { createHash, randomBytes } from "node:crypto";
 import { desktopRuntime } from './desktop-runtime';
+import { desktopUpdater, browserUpdateSnapshot } from './desktop-updates';
+import { createUpdateActivity, holdResponse } from './update-activity';
+import type { DesktopUpdateAction } from '../shared/desktop-updates';
+import { createDesktopAppearance, DesktopAppearanceError } from './desktop-appearance';
 import { createPromptLibrary, PromptLibraryError } from './prompt-library';
 import { createMediaLibrary, MediaLibraryError } from './library';
 import { resolve, sep } from "node:path";
@@ -41,6 +45,12 @@ const promptLibrary = createPromptLibrary(db);
 const mediaLibrary = createMediaLibrary(db);
 const production = process.env.NODE_ENV === "production";
 const desktop = desktopRuntime();
+const desktopAppearance = desktop ? createDesktopAppearance(db) : null;
+const updateActivity = createUpdateActivity(() => collectionWorkBusy() || localOutputWorkBusy());
+desktopUpdater()?.configure(updateActivity, () => {
+  const result = db.query('PRAGMA wal_checkpoint(TRUNCATE)').get() as { busy?: number } | null;
+  return result?.busy === 0;
+});
 let publicBase = new URL(process.env.PUBLIC_BASE_URL ?? `http://localhost:${port}`);
 if (production && !desktop && publicBase.protocol !== "https:") throw new Error("Production requires HTTPS PUBLIC_BASE_URL");
 const secureCookies = production && !desktop;
@@ -1375,6 +1385,27 @@ async function proxyMedia(upstream: Response, output: Record<string, any>, maxBy
 }
 
 async function handleApi(request: Request, url: URL): Promise<Response> {
+  if (url.pathname === '/api/studio/v1/desktop-appearance') {
+    if (request.method === 'GET') return json(desktopAppearance?.read() ?? { desktop: false, accentColor: null, revision: null });
+    if (!desktopAppearance) return errorResponse('unsupported_action', 'Desktop appearance belongs to the installed app.', 409);
+    if (request.method !== 'PATCH') return errorResponse('unsupported_action', 'Unsupported appearance action.', 405);
+    if (!validCsrf(request)) return errorResponse('invalid_input', 'Refresh Studio before saving an accent color.', 403);
+    const body = await readBody(request, 512);
+    if (!body || Object.keys(body).length !== 2 || !Object.keys(body).every(key => ['accentColor', 'revision'].includes(key))) return errorResponse('invalid_input', 'Choose a valid accent color.', 400);
+    try { return json(desktopAppearance.write(body.accentColor, body.revision)); }
+    catch (error) { if (error instanceof DesktopAppearanceError) return errorResponse('invalid_input', error.message, error.status); throw error; }
+  }
+  if (url.pathname === '/api/studio/v1/desktop-updates') {
+    const updater = desktop ? desktopUpdater() : null;
+    if (request.method === 'GET') return json(updater?.snapshot() ?? browserUpdateSnapshot());
+    if (request.method !== 'POST') return errorResponse('unsupported_action', 'Unsupported update action.', 405);
+    if (!updater) return errorResponse('unsupported_action', 'App updates are managed by the installed desktop app.', 409);
+    if (!validCsrf(request)) return errorResponse('invalid_input', 'Refresh Studio before changing an update.', 403);
+    const body = await readBody(request, 512);
+    if (!body || Object.keys(body).length !== 1 || typeof body.action !== 'string' || !['check', 'download', 'cancel', 'apply'].includes(body.action)) return errorResponse('invalid_input', 'Choose a supported update action.', 400);
+    try { await updater.action(body.action as DesktopUpdateAction); return json(updater.snapshot()); }
+    catch (error) { return errorResponse('unsupported_action', error instanceof Error ? error.message : 'The update action could not be completed.', 409); }
+  }
   const path = url.pathname;
   const method = request.method;
 
@@ -1901,12 +1932,20 @@ async function handle(request: Request): Promise<Response> {
     }
   }
   let response: Response;
+  let releaseUpdateWork: (() => void) | null = null;
+  if (desktop && url.pathname.startsWith('/api/') && url.pathname !== '/api/studio/v1/desktop-updates') {
+    releaseUpdateWork = updateActivity.begin();
+    if (!releaseUpdateWork) return securityHeaders(errorResponse('unsupported_action', 'Studio is restarting to apply an update. Try again after it reopens.', 503));
+  }
   if (url.pathname.startsWith("/api/") || url.pathname === "/healthz") {
     try {
-      const initialUser = getCurrentUser(request), initialConnection = initialUser ? connectionStatus(initialUser.id) : null;
-      response = initialUser && initialConnection ? await withAccountConnection(initialUser.id,initialConnection.revision,()=>handleApi(request,url),()=>getCurrentUser(request)?.id === initialUser.id) : await handleApi(request,url);
+      if (['/api/studio/v1/desktop-updates', '/api/studio/v1/desktop-appearance'].includes(url.pathname)) response = await handleApi(request, url);
+      else {
+        const initialUser = getCurrentUser(request), initialConnection = initialUser ? connectionStatus(initialUser.id) : null;
+        response = initialUser && initialConnection ? await withAccountConnection(initialUser.id,initialConnection.revision,()=>handleApi(request,url),()=>getCurrentUser(request)?.id === initialUser.id) : await handleApi(request,url);
+      }
     }
-    catch (error) { if (!(error instanceof ConnectionError)) throw error; response = errorResponse(error.code === 'insufficient_scope' ? 'insufficient_scope' : 'civitai_not_connected',error.message,403); }
+    catch (error) { if (!(error instanceof ConnectionError)) { releaseUpdateWork?.(); throw error; } response = errorResponse(error.code === 'insufficient_scope' ? 'insufficient_scope' : 'civitai_not_connected',error.message,403); }
   } else if (request.method === "GET" || request.method === "HEAD") {
     let decoded: string;
     try { decoded = decodeURIComponent(url.pathname); }
@@ -1928,7 +1967,7 @@ async function handle(request: Request): Promise<Response> {
   } else {
     response = new Response("Method not allowed", { status: 405, headers: { Allow: "GET, HEAD" } });
   }
-  return securityHeaders(response);
+  return securityHeaders(holdResponse(response, releaseUpdateWork));
 }
 
 const server = Bun.serve({

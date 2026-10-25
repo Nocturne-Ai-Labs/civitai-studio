@@ -1,7 +1,7 @@
 {
   "name": "civitai-studio",
   "private": true,
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "type": "module",
   "workspaces": [
     "web",
@@ -12,6 +12,7 @@
     "dev": "bun run --cwd server dev",
     "start": "bun run --cwd server start",
     "desktop:release": "bun --no-env-file scripts/desktop-release.ts",
+    "desktop:update-manifest": "bun --no-env-file scripts/desktop-update-manifest.ts",
     "desktop:sidecar": "bun --no-env-file scripts/desktop-release.ts --sidecar-only"
   },
   "devDependencies": {

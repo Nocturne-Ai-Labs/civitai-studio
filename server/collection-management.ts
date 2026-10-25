@@ -16,6 +16,7 @@ const json = (body:unknown,status=200) => Response.json(body,{status,headers:{'C
 class ManagementError extends Error { constructor(message:string,readonly status=400,readonly code='collection_action_failed'){super(message)} }
 const activeFollows = new Set<string>()
 const activeMutations = new Set<string>()
+export const collectionManagementBusy = () => activeFollows.size > 0 || activeMutations.size > 0
 db.exec(`CREATE TABLE IF NOT EXISTS collection_follows(user_id TEXT NOT NULL,collection_id INTEGER NOT NULL,record_json TEXT NOT NULL,PRIMARY KEY(user_id,collection_id));
 CREATE TABLE IF NOT EXISTS collection_mutations(user_id TEXT NOT NULL,collection_id INTEGER NOT NULL,record_json TEXT NOT NULL,PRIMARY KEY(user_id,collection_id));`)
 function storeDestination(userId:string,item:CollectionDestination) {

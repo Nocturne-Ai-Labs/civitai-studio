@@ -1,4 +1,4 @@
-CIVITAI STUDIO - 0.1.0-beta.1 - EARLY BETA
+CIVITAI STUDIO - 0.1.0-beta.2 - EARLY BETA
 
 WINDOWS ZIP
 1. Extract the entire ZIP to a normal folder. Do not launch from inside the ZIP.
@@ -39,11 +39,21 @@ Windows DPAPI, macOS Keychain or Linux Secret Service. Do not share profiles.
 This desktop profile is separate from the browser development profile.
 Closing the app stops its local service. Ordinary updates retain your profile.
 
+UPDATES
+Open Settings > Updates to check, download, then choose Restart to update.
+The app verifies signed update packages before installation. Restart waits for
+local transfers and saves to finish; cloud work can be recovered after reopening.
+Automatic installation is supported by the Windows installer, macOS app, and
+Linux AppImage. Windows portable ZIP and Linux .deb/raw archive users use the
+matching manual download. Updating preserves your existing account profile.
+Users upgrading from beta 1 need to install beta 2 once to gain this updater.
+Updater signatures verify downloads; they are separate from OS code signing.
+
 BETA LIMITS
 This is an unsigned, unnotarized testing release. OS reputation warnings may
 appear. Generation spends your own Civitai Buzz only after cost review and your
 explicit confirmation. Civitai API keys need appropriate permissions; OAuth is
 not configured in this beta. Provider workflows and advanced models may fail
 validation. Report issues with OS/version and steps; never send your API key,
-database, browser cookies or protected key file. Signing, auto-update, store
+database, browser cookies or protected key file. OS signing, store
 distribution and website hosting are not included.

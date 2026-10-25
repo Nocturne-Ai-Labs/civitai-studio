@@ -5,7 +5,8 @@ import { Button, Input } from './ui'
 import { folderSavingSupported } from './folder-save'
 import type { LocalStorageSettings } from '../../shared/local-storage'
 import { BrowsingSettings, type BrowsingController } from './BrowsingSettings'
-import { AccentColorPicker } from './AccentColorPicker'
+import { AccentColorPicker, type AccentPersistence } from './AccentColorPicker'
+import { DesktopUpdatesCard, type DesktopUpdateController } from './DesktopUpdates'
 
 export function useLocalStorageSettings(accountId: string | null) {
   const owner = useRef(accountId); owner.current = accountId
@@ -51,8 +52,8 @@ export function useLocalStorageSettings(accountId: string | null) {
 }
 type StorageController = ReturnType<typeof useLocalStorageSettings>
 
-export function SettingsPanel({ accountId, accountName, accentColor, onAccentColor, onAccount, onGuide, onGallery, storage, browsing }: {
-  accountId: string | null; accountName?: string; accentColor: string; onAccentColor: (color: string) => void; onAccount: () => void; onGuide: () => void; onGallery: () => void; storage: StorageController; browsing: BrowsingController
+export function SettingsPanel({ accountId, accountName, accentColor, onAccentColor, onAccount, onGuide, onGallery, storage, browsing, updates, updateBusy, accentPersistence }: {
+  accountId: string | null; accountName?: string; accentColor: string; onAccentColor: (color: string) => void; onAccount: () => void; onGuide: () => void; onGallery: () => void; storage: StorageController; browsing: BrowsingController; updates: DesktopUpdateController; updateBusy: boolean; accentPersistence: AccentPersistence
 }) {
   const [path, setPath] = useState(''), [copyMessage, setCopyMessage] = useState('')
   const { settings, busy } = storage
@@ -90,7 +91,7 @@ export function SettingsPanel({ accountId, accountName, accentColor, onAccentCol
         <h3>Date organization</h3><p>Originals and metadata sidecars are grouped into <code>images/YYYY-MM-DD</code>, <code>videos/YYYY-MM-DD</code>, <code>audio/YYYY-MM-DD</code>, <code>3d-models/YYYY-MM-DD</code> and <code>lora/YYYY-MM-DD</code> directories using UTC timestamps. Local saves use unique filenames and skip verified duplicates. Limits: 50 outputs, 100 MiB per audio file, 500 MiB per other media file, 1 GiB per LoRA checkpoint, 2 GiB per manual local batch. Automatic saving handles one output per transfer; checkpoints and training samples share the lora category. ZIP archives remain limited to 150 MiB.</p>
         {settings?.enabled && <AutoSaveQueue storage={storage} />}
       </section></div>
-      <div className="column"><BrowsingSettings accountId={accountId} browsing={browsing} /><section className="panel-card settings-card appearance-card" aria-labelledby="appearance-title"><h2 id="appearance-title" tabIndex={-1} className="section-title">Appearance</h2><AccentColorPicker color={accentColor} onChange={onAccentColor} /></section>
+      <div className="column"><DesktopUpdatesCard updates={updates} clientBusy={updateBusy} /><BrowsingSettings accountId={accountId} browsing={browsing} /><section className="panel-card settings-card appearance-card" aria-labelledby="appearance-title"><h2 id="appearance-title" tabIndex={-1} className="section-title">Appearance</h2><AccentColorPicker color={accentColor} onChange={onAccentColor} persistence={accentPersistence} /></section>
         <section className="panel-card settings-card"><h2 className="section-title">Account</h2><p>{accountId ? accountName || 'Civitai connected' : 'Civitai disconnected'}</p><div className="account-guide-actions"><Button type="button" variant="secondary" onClick={onAccount}>{accountId ? 'Manage connection' : 'Connect Civitai'}</Button><Button type="button" variant="ghost" onClick={onGuide}>Getting started &amp; Buzz guide</Button></div><p>Output destinations and save history belong to the connected account.</p></section>
       </div>
     </div>

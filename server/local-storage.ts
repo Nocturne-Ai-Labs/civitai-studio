@@ -15,6 +15,7 @@ export type Destination = { base_path: string; effective_path: string; identity:
 export type ManifestItem = { category: OutputCategory; maxBytes?: number; outputId: string; filename: string | null; dateFolder: string | null; metadata?: Record<string, unknown> };
 const jobs = new Map<string, { job: LocalSaveJob; updated: number }>();
 const busy = new Set<string>();
+export const localOutputWorkBusy = () => busy.size > 0;
 
 db.exec(`CREATE TABLE IF NOT EXISTS studio_local_destinations (user_id TEXT PRIMARY KEY, base_path TEXT NOT NULL, effective_path TEXT NOT NULL, identity TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS studio_local_exports (user_id TEXT NOT NULL, destination TEXT NOT NULL, output_id TEXT NOT NULL, generation_id TEXT NOT NULL, date_folder TEXT NOT NULL, filename TEXT NOT NULL, bytes INTEGER NOT NULL, sha256 TEXT NOT NULL, sidecar_sha256 TEXT NOT NULL, PRIMARY KEY(user_id,destination,output_id,generation_id));`);

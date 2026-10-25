@@ -6,6 +6,8 @@ import type { GenerationPolicy, GenerationPreview, WorkflowOptions } from '../..
 import type { ArtworkFilters, ArtworkPage } from '../../shared/artworks'
 import type { CollectionDestination, CollectionTransfer, PublicCollection, CollectionType, SiteCollectionSave, CollectionFollow, CollectionMutation } from '../../shared/collections'
 import type { LibraryState } from '../../shared/library'
+import type { DesktopUpdateAction, DesktopUpdatesSnapshot } from '../../shared/desktop-updates'
+import type { DesktopAppearance } from '../../shared/desktop-appearance'
 import type { ComposerConfig, Preset, ModelVersion } from '../../shared/composer'
 import type { PromptSnippet, PromptSnippetInput, PromptSnapshot, PromptSnapshotInput, PromptHistoryItem } from '../../shared/prompt-library'
 export type DownloadItem = { category: import('../../shared/output-folders').OutputCategory; outputId: string; status: string; filename: string | null; dateFolder: string | null; error: string | null; contentUrl?: string; metadata?: Record<string, unknown> }
@@ -88,6 +90,10 @@ async function discovery<T>(path: string, accountId: string, signal?: AbortSigna
   }
 }
 export const studioApi = {
+  desktopAppearance: (signal?: AbortSignal) => api<DesktopAppearance>(`${base}/desktop-appearance`, { signal }),
+  saveDesktopAppearance: (accentColor: string, revision: string, signal?: AbortSignal) => api<DesktopAppearance>(`${base}/desktop-appearance`, { method: 'PATCH', signal, headers: { 'X-CSRF-Token': csrfToken }, body: JSON.stringify({ accentColor, revision }) }),
+  desktopUpdates: (signal?: AbortSignal) => api<DesktopUpdatesSnapshot>(`${base}/desktop-updates`, { signal }),
+  desktopUpdateAction: (action: DesktopUpdateAction, signal?: AbortSignal) => api<DesktopUpdatesSnapshot>(`${base}/desktop-updates`, { method: 'POST', signal, headers: { 'X-CSRF-Token': csrfToken }, body: JSON.stringify({ action }) }),
   library: (accountId:string,signal?:AbortSignal) => api<LibraryState>(`${base}/library`,{signal,headers:{'X-Studio-Account':accountId}}),
   createLibraryFolder: (accountId:string,revision:string,name:string,signal?:AbortSignal) => api<LibraryState>(`${base}/library/folders`,{method:'POST',signal,headers:{'X-Studio-Account':accountId,'X-CSRF-Token':csrfToken},body:JSON.stringify({revision,name})}),
   renameLibraryFolder: (accountId:string,revision:string,id:string,name:string,signal?:AbortSignal) => api<LibraryState>(`${base}/library/folders/${encodeURIComponent(id)}`,{method:'PATCH',signal,headers:{'X-Studio-Account':accountId,'X-CSRF-Token':csrfToken},body:JSON.stringify({revision,name})}),

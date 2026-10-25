@@ -66,6 +66,9 @@ jobs:
 
       - name: Package Windows and Linux
         if: runner.os != 'macOS'
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: bun desktop:release --target ${{ matrix.target }}
 
       - name: Package macOS with ad-hoc signature
@@ -73,7 +76,39 @@ jobs:
         env:
           # Local integrity only: this is not Developer ID signing/notarization.
           APPLE_SIGNING_IDENTITY: '-'
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: bun desktop:release --target ${{ matrix.target }}
+
+      - name: Verify Windows updater installation and registration
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          RELEASE_TARGET: ${{ matrix.target }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
+          if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'The isolated Windows runner requires an elevated token for this per-machine installer check.' }
+          $output = Join-Path 'releases' $env:RELEASE_TARGET
+          $manifest = Get-Content -LiteralPath (Join-Path $output 'release-manifest.json') -Raw | ConvertFrom-Json
+          $installer = (Resolve-Path -LiteralPath (Join-Path $output $manifest.updater.filename)).Path
+          $installDirectory = [IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'civitai-studio-updater-install'))
+          $registryPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Civitai Studio Alpha'
+          if (Test-Path -LiteralPath $registryPath) { throw 'Expected a clean ephemeral runner with no existing Studio installation.' }
+          # Exercise the updater's /UPDATE path without launching an app or
+          # downloading WebView2. This VM is discarded after the job.
+          $first = Start-Process -FilePath $installer -ArgumentList @('/S', '/UPDATE', '/NS', "/D=$installDirectory") -PassThru -WindowStyle Hidden
+          if (-not $first.WaitForExit(120000) -or $first.ExitCode -ne 0) { throw 'The isolated updater installer did not complete successfully.' }
+          $registration = Get-ItemProperty -LiteralPath $registryPath
+          if ($registration.InstallLocation.Trim('"') -ne $installDirectory -or $registration.MainBinaryName -ne 'civitai-studio-desktop.exe') { throw 'Installed registration does not match the updater-supported executable path.' }
+          foreach ($file in @($registration.MainBinaryName, 'studio-service.exe', 'uninstall.exe')) { if (-not (Test-Path -LiteralPath (Join-Path $installDirectory $file) -PathType Leaf)) { throw "The installed package is missing $file." } }
+          $bundledService = Join-Path 'desktop/src-tauri/binaries' "studio-service-$($env:RELEASE_TARGET).exe"
+          if ((Get-FileHash -LiteralPath (Join-Path $installDirectory 'studio-service.exe')).Hash -ne (Get-FileHash -LiteralPath $bundledService).Hash) { throw 'Installed service differs from the signed release build.' }
+          # With /D omitted, another update must preserve the chosen directory.
+          $second = Start-Process -FilePath $installer -ArgumentList @('/S', '/UPDATE', '/NS') -PassThru -WindowStyle Hidden
+          if (-not $second.WaitForExit(120000) -or $second.ExitCode -ne 0) { throw 'The second isolated update did not complete successfully.' }
+          if ((Get-ItemProperty -LiteralPath $registryPath).InstallLocation.Trim('"') -ne $installDirectory) { throw 'The updater did not preserve the custom installation directory.' }
+          Write-Output 'Windows updater installation, paired binaries, registry identity, and retained install directory passed. No app, account, or provider operation was launched.'
 
       - name: Verify packaged service startup
         if: runner.os != 'Windows'
@@ -167,6 +202,7 @@ jobs:
             releases/${{ matrix.target }}/*.deb
             releases/${{ matrix.target }}/*.rpm
             releases/${{ matrix.target }}/*.AppImage
+            releases/${{ matrix.target }}/*.sig
             releases/${{ matrix.target }}/SHA256SUMS
             releases/${{ matrix.target }}/release-manifest.json
           if-no-files-found: error

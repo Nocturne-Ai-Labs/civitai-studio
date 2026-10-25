@@ -13,7 +13,8 @@ const swatches = [
 function ColorSlider({ label, value, gradient, onChange }: { label: string; value: number; gradient: string; onChange: (value: number) => void }) {
   return <div className="accent-slider-field"><div><label>{label}</label><output>{Math.round(value)}%</output></div><Slider.Root className="accent-slider" min={0} max={100} step={1} value={[Math.round(value)]} onValueChange={values => onChange(values[0]!)}><Slider.Track className="accent-slider-track" style={{ background: gradient }}><Slider.Range className="accent-slider-range" /></Slider.Track><Slider.Thumb className="accent-slider-thumb" aria-label={`Accent ${label.toLowerCase()}`} aria-valuetext={`${Math.round(value)} percent`} /></Slider.Root></div>
 }
-export function AccentColorPicker({ color, onChange }: { color: string; onChange: (color: string) => void }) {
+export type AccentPersistence = { saving: boolean; error: string; retry: () => void }
+export function AccentColorPicker({ color, onChange, persistence }: { color: string; onChange: (color: string) => void; persistence?: AccentPersistence }) {
   const [hsv, setHsv] = useState<HsvColor>(() => hexToHsv(color))
   const [hexInput, setHexInput] = useState(color), [hexError, setHexError] = useState('')
   const lastEmitted = useRef(color)
@@ -52,6 +53,7 @@ export function AccentColorPicker({ color, onChange }: { color: string; onChange
     <div className="accent-swatches" role="group" aria-label="Accent color presets">{swatches.map(swatch => <Button type="button" key={swatch.color} variant="ghost" size="icon" className="accent-swatch" aria-label={swatch.name} aria-pressed={color === swatch.color} title={swatch.name} onClick={() => chooseHex(swatch.color)}><span style={{ backgroundColor: swatch.color }} /></Button>)}</div>
     <div className="accent-preview" aria-label="Current accent preview"><span className="accent-preview-action">Button preview</span><span className="accent-preview-link">Highlight preview</span></div>
     <Button type="button" variant="ghost" size="sm" onClick={() => chooseHex(defaultAccentColor)}><RotateCcw size={13} />Reset to Civitai blue</Button>
-    <p className="field-help">Saved for this browser. Studio adjusts button and text shades to keep them readable. Buzz and status colors stay consistent.</p>
+    <p className="field-help">Saved on this device. Studio adjusts button and text shades to keep them readable. Buzz and status colors stay consistent.</p>
+    {persistence?.error ? <div className="error-box" role="alert">{persistence.error}<Button type="button" variant="ghost" size="sm" onClick={persistence.retry}>Retry saving color</Button></div> : persistence?.saving ? <p className="field-help" role="status">Saving your accent color…</p> : null}
   </div>
 }
